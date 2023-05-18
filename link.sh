@@ -1,15 +1,13 @@
 #!/bin/bash -eu
 
-DOTDEFAULT=$(cd $(dirname $0)/default/; pwd)
-
-link() {
+dotlink() {
     mkdir -p ~/$(dirname ${1})
-    ln -snfv ${DOTDEFAULT}/${1} ~/${1}
+    ln -snfv $(cd $(dirname ${0}); pwd)/${1} ~/${1}
 }
 
 # git
-link .config/git/config
+dotlink .config/git/config
 
 # nvim
-link .config/nvim/init.vim
+dotlink .config/nvim/init.vim
 
