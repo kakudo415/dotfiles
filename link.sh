@@ -11,3 +11,6 @@ dotlink .config/git/config
 # nvim
 dotlink .config/nvim/init.vim
 
+# tmux
+dotlink .config/tmux/tmux.conf
+
