@@ -14,3 +14,6 @@ dotlink .config/nvim/init.vim
 # tmux
 dotlink .config/tmux/tmux.conf
 
+# gdb
+dotlink .config/gdb/gdbinit
+
