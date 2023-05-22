@@ -1,0 +1,6 @@
+{
+    "languageServers": {
+        "rust": "~/.cargo/bin/rust-analyzer"
+    }
+}
+

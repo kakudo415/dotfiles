@@ -17,3 +17,6 @@ dotlink .config/tmux/tmux.conf
 # gdb
 dotlink .config/gdb/gdbinit
 
+# sura (https://github.com/kakudo415/sura)
+dotlink .config/sura/config.json
+
