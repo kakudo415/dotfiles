@@ -29,7 +29,11 @@ HISTIGNORE='history:pwd:ls:ls *:la:la *'
 HISTCONTROL=ignoreboth
 
 # Aliases
+# https://github.com/lsd-rs/lsd
+[ -f ~/.cargo/env ] && . ~/.cargo/env
+if type 'lsd' > /dev/null 2>&1
+then
+    alias ls='lsd'
+fi
 alias ll='ls -alF'
 alias la='ls -A'
-alias l='ls -CF'
-
