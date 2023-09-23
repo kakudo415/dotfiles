@@ -11,7 +11,8 @@ shopt -s histappend
 
 # Prompt
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
-# /usr/share/bash-completion/completions/git
+. ~/.config/git/git-completion.sh
+. ~/.config/git/git-prompt.sh
 GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWSTASHSTATE=1
 GIT_PS1_SHOWUNTRACKEDFILES=1

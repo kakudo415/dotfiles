@@ -8,6 +8,14 @@ exists() {
     type ${1} > /dev/null 2>&1
 }
 
+# Git completion and prompt
+
+mkdir -p ~/.config/git/
+[ ! -f ~/.config/git/git-completion.sh ] && curl -o ~/.config/git/git-completion.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+[ ! -f ~/.config/git/git-prompt.sh ] && curl -o ~/.config/git/git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
+# Install with Cargo
+
 cargo_install() {
     if exists ${1}
     then
