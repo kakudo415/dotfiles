@@ -23,3 +23,5 @@ dotlink .config/sura/config.json
 # bash
 dotlink .bashrc
 
+# zsh
+dotlink .zshrc
