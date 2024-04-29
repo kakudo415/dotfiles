@@ -7,6 +7,7 @@ dotlink() {
 
 # git
 dotlink .config/git/config
+dotlink .config/git/ignore
 
 # nvim
 dotlink .config/nvim/init.vim
