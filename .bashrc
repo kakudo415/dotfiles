@@ -17,9 +17,16 @@ GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWSTASHSTATE=1
 GIT_PS1_SHOWUNTRACKEDFILES=1
 GIT_PS1_SHOWUPSTREAM='auto'
+
+if type __git_ps1 > /dev/null 2>&1; then
 PS1='
 \[\e[32m\]\u@\H\[\e[0m\]: \[\e[36m\]\w
 \[\e[33m\]$(__git_ps1 "(%s) ")\[\e[0m\]\$ '
+else
+PS1='
+\[\e[32m\]\u@\H\[\e[0m\]: \[\e[36m\]\w
+\[\e[0m\]\$ '
+fi
 
 # History
 PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
