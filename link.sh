@@ -1,8 +1,18 @@
 #!/bin/bash -eu
 
+iso8601() {
+    date -u '+%Y%m%dT%H%M%SZ'
+}
+
 dotlink() {
-    mkdir -p ~/$(dirname ${1})
-    ln -snfv $(cd $(dirname ${0}); pwd)/${1} ~/${1}
+    if [ -f "$HOME/${1}" ] && [ ! -L "$HOME/${1}" ]; then
+        echo -n '[Backup] '
+        cp -v "$HOME/${1}" "$HOME/${1}-$(iso8601)"
+    fi
+
+    echo -n '[Link]   '
+    mkdir -p "$HOME/$(dirname ${1})"
+    ln -snfv "$(cd $(dirname ${0}); pwd)/${1}" "$HOME/${1}"
 }
 
 # git
