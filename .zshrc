@@ -29,20 +29,3 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 
-# Environment variables
-export LLVM16="/Users/kakudo/Documents/github.com/kakudo415/llvm-project/build/bin"
-export PATH="/Users/kakudo/bin/sass_embedded:$PATH"
-
-export DENO_INSTALL="/Users/kakudo/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-export PATH="/usr/local/bin:$PATH"
-export PATH="/usr/local/textlive/2023/bin/universal-darwin:$PATH"
-
-export PATH="/Users/kakudo/Downloads/jdk-22.0.1.jdk/Contents/Home/bin:$PATH"
-export PATH="/Users/kakudo/bin:$PATH"
-
-# opam configuration
-[[ ! -r /Users/kakudo/.opam/opam-init/init.zsh ]] || source /Users/kakudo/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
-
-[ -f "/Users/kakudo/.ghcup/env" ] && . "/Users/kakudo/.ghcup/env" # ghcup-env
