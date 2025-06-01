@@ -36,3 +36,6 @@ dotlink .bashrc
 
 # zsh
 dotlink .zshrc
+
+# claude
+dotlink .claude/settings.json
