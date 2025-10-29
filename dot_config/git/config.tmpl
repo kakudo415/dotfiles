@@ -1,0 +1,17 @@
+[user]
+	name  = KAKUDO Kentaro
+	email = 31888089+kakudo415@users.noreply.github.com
+{{- if .gpg.keyID }}
+	signingkey = {{ .gpg.keyID }}
+{{- end }}
+
+[core]
+	editor = nvim
+
+{{ if .gpg.keyID -}}
+[gpg]
+	program = gpg
+
+[commit]
+	gpgsign = true
+{{- end }}
