@@ -29,3 +29,5 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 
+[ -f ~/.zshrc.local ] && . ~/.zshrc.local
+
