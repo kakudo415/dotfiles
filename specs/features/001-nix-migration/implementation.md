@@ -323,7 +323,7 @@ endif
 移行先:
 
 ```nix
-programs.ghostty.settings
+xdg.configFile."ghostty/config"
 ```
 
 移植内容:
@@ -333,9 +333,9 @@ programs.ghostty.settings
 - `background-opacity = 0.85`
 - `background-blur-radius = 15`
 
-GhosttyはGUIアプリ本体もHome Managerで管理する。`programs.ghostty.enable = true`を設定し、`programs.ghostty.package`は既定値を使う。
+nixpkgs 26.05の既定Ghostty packageは`aarch64-darwin`で利用不可だったため、[ADR](./adr/ghostty-on-darwin.md)に従い、第一段階ではアプリ本体をHome Manager管理対象から外し、設定ファイルのみを生成する。
 
-`aarch64-darwin`で既定packageがbuildできることを検証する。利用不可またはbrokenの場合は、`programs.ghostty.package = null`で設定だけ管理するfallbackを入れず、GUIアプリ管理方針をADRで見直す。
+`programs.ghostty.package = null`による暗黙のfallbackは使わない。
 
 ### GDB
 

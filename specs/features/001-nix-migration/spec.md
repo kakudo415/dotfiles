@@ -26,7 +26,7 @@
 | `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。 |
 | `dot_config/tmux/tmux.conf` | `programs.tmux.extraConfig` | 既存設定をそのまま移植する。 |
 | `dot_config/nvim/init.vim` | `programs.neovim.extraConfig` | まずは挙動維持を優先し、プラグイン管理は別タスクにする。local vimscriptが必要な場合は末尾でsourceする。 |
-| `dot_config/ghostty/config` | `programs.ghostty` | `enable`と`settings`を使い、fontやopacity設定を維持する。 |
+| `dot_config/ghostty/config` | `xdg.configFile."ghostty/config"` | nixpkgs 26.05のGhostty packageが`aarch64-darwin`で利用不可のため、第一段階では設定のみをHome Managerで生成する。詳細は[ADR](./adr/ghostty-on-darwin.md)。 |
 | `dot_config/gdb/gdbinit` | `home/modules/gdb.nix` | Home Manager公式moduleがないため、自前moduleで`~/.config/gdb/gdbinit`を生成する。 |
 | `dot_claude/settings.json` | `home/modules/claude.nix` + `home/modules/json-merge.nix` | Home Manager公式moduleがないため、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeする。 |
 
@@ -75,7 +75,7 @@
 - 既存の`~/.zshrc.local`読み込み互換は維持すること。
 - Home Manager moduleがあるツールは、`home.file`や`xdg.configFile`による丸ごと配置ではなく、可能な限り各`programs.*` moduleの設定項目を使うこと。
 - NixでinstallできるCLI toolやアプリ依存は、可能な限りHome Managerの`home.packages`または各`programs.*` moduleで管理すること。
-- Ghosttyは`programs.ghostty.enable = true`でアプリ本体も管理し、`aarch64-darwin`で既定packageがbuildできることを検証すること。利用不可の場合は設定だけ管理するfallbackを入れず、代替方針をADRで決めること。
+- Ghosttyは`aarch64-darwin`で既定packageがbuildできることを検証すること。nixpkgs 26.05で利用不可だったため、第一段階では[ADR](./adr/ghostty-on-darwin.md)に従い、アプリ本体はHome Manager管理対象から外し、設定ファイルのみを生成する。
 
 ### 運用と検証
 
