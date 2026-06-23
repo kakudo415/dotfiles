@@ -16,19 +16,19 @@
 
 ### 現状のchezmoi管理対象
 
-| 現在のファイル | 移行先候補 | 備考 |
+| 現在のファイル | 移行先 | 備考 |
 | --- | --- | --- |
 | `.chezmoi.toml.tmpl` | 廃止 | GPG key ID入力はGit local layerまたはsecret管理へ移す。 |
 | `.chezmoiignore` | 廃止 | Nix移行後は不要。 |
-| `dot_bashrc` | `programs.bash.initExtra`または`home.file.".bashrc".text` | git completion/promptはNixの`git`パッケージ由来のファイルを参照する。 |
-| `dot_zshrc` | `programs.zsh.initContent`または`home.file.".zshrc".text` | 既存の`~/.zshrc.local`読み込みは維持する。 |
-| `dot_config/git/config.tmpl` | `programs.git` | 共通Git設定を移植する。GPG signing keyや職場Git設定は公開設定から分離する。 |
-| `dot_config/git/ignore` | `programs.git.ignores`または`xdg.configFile."git/ignore"` | `.DS_Store`を維持する。 |
+| `dot_bashrc` | `programs.bash.initExtra` | git completion/promptはNixの`git`パッケージ由来のファイルを参照する。末尾でlocal bashrcをsourceする。 |
+| `dot_zshrc` | `programs.zsh.initContent` | 既存の`~/.zshrc.local`読み込みを維持し、末尾でlocal zshrcをsourceする。 |
+| `dot_config/git/config.tmpl` | `programs.git` | 共通Git設定を移植する。GPG signing keyや職場Git設定はGit includeでlocal layerへ分離する。 |
+| `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。local ignoreが必要な場合はGit include先で扱う。 |
 | `dot_config/tmux/tmux.conf` | `programs.tmux.extraConfig` | 既存設定をそのまま移植する。 |
-| `dot_config/nvim/init.vim` | `programs.neovim.extraConfig`または`xdg.configFile."nvim/init.vim"` | まずは挙動維持を優先し、プラグイン管理は別タスクにする。 |
-| `dot_config/ghostty/config` | `xdg.configFile."ghostty/config"` | fontやopacity設定を維持する。 |
-| `dot_config/gdb/gdbinit` | `xdg.configFile."gdb/gdbinit"` | そのまま配置する。 |
-| `dot_claude/settings.json` | activation時に共通JSONとlocal JSONをmerge | telemetry無効化等を維持する。 |
+| `dot_config/nvim/init.vim` | `programs.neovim.extraConfig` | まずは挙動維持を優先し、プラグイン管理は別タスクにする。local vimscriptが必要な場合は末尾でsourceする。 |
+| `dot_config/ghostty/config` | `programs.ghostty.settings` | fontやopacity設定を維持する。 |
+| `dot_config/gdb/gdbinit` | `programs.gdb.initExtra` | 既存の`set disassembly-flavor intel`を移植する。 |
+| `dot_claude/settings.json` | `home/modules/claude.nix` + `home/modules/json-merge.nix` | Home Manager公式moduleがないため、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeする。 |
 
 ## 要求事項
 
@@ -65,6 +65,7 @@
 ### Shellとツール設定
 
 - 既存の`~/.zshrc.local`読み込み互換は維持すること。
+- Home Manager moduleがあるツールは、`home.file`や`xdg.configFile`による丸ごと配置ではなく、可能な限り各`programs.*` moduleの設定項目を使うこと。
 - NixでinstallできるCLI toolやアプリ依存は、可能な限りHome Managerの`home.packages`または各`programs.*` moduleで管理すること。
 
 ### 運用と検証
@@ -222,12 +223,13 @@ home-manager switch --flake .#kakudo
 6. ツール設定を移行する
    - tmuxは`programs.tmux.extraConfig`へ移す。
    - Neovimはまず既存`init.vim`相当を再現する。
-   - Ghostty、gdbは`xdg.configFile`または`home.file`で配置する。
-   - ClaudeなどJSON設定は、共通JSONとlocal JSONをactivation時にmergeして配置する。
+   - Ghosttyは`programs.ghostty.settings`へ移す。
+   - gdbは`programs.gdb.initExtra`へ移す。
+   - ClaudeなどHome Manager公式moduleがないJSON設定は、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeして配置する。
 
 7. package管理を追加する
    - Nixでinstallできるものは可能な限り`home.packages`またはHome Managerの`programs.*` moduleで管理する。
-   - 初期候補は`git`、`tmux`、`neovim`、`gdb`、`lsd`、`jq`、`gnupg`、`rust-analyzer`。
+   - 初期package候補は`git`、`tmux`、`neovim`、`gdb`、`lsd`、`jq`、`gnupg`、`rust-analyzer`。
    - GUIアプリやフォントは第一段階では管理しない。
 
 8. 検証する
