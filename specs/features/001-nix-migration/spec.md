@@ -26,7 +26,7 @@
 | `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。 |
 | `dot_config/tmux/tmux.conf` | `programs.tmux.extraConfig` | 既存設定をそのまま移植する。 |
 | `dot_config/nvim/init.vim` | `programs.neovim.extraConfig` | まずは挙動維持を優先し、プラグイン管理は別タスクにする。local vimscriptが必要な場合は末尾でsourceする。 |
-| `dot_config/ghostty/config` | `programs.ghostty.settings` | fontやopacity設定を維持する。 |
+| `dot_config/ghostty/config` | `programs.ghostty` | `enable`と`settings`を使い、fontやopacity設定を維持する。 |
 | `dot_config/gdb/gdbinit` | `home/modules/gdb.nix` | Home Manager公式moduleがないため、自前moduleで`~/.config/gdb/gdbinit`を生成する。 |
 | `dot_claude/settings.json` | `home/modules/claude.nix` + `home/modules/json-merge.nix` | Home Manager公式moduleがないため、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeする。 |
 
@@ -47,6 +47,8 @@
 - 第一段階ではHome Manager単体で管理し、nix-darwinは導入しないこと。[ADR](./adr/home-manager-and-flakes.md)
 - Flakesを採用し、`flake.nix`と`flake.lock`でHome Manager構成を管理すること。[ADR](./adr/home-manager-and-flakes.md)
 - `flake.lock`はコミットし、複数PCで同じ入力バージョンを使うこと。
+- 初回適用と通常適用の入口は、flake内の`apps.aarch64-darwin.apply`からHome Manager activation packageを実行する`nix run .#apply`に統一すること。[ADR](./adr/home-manager-and-flakes.md)
+- `home.stateVersion`は初回導入時のHome Manager互換性基準として`26.05`に固定し、通常のinput更新では変更しないこと。[ADR](./adr/home-manager-and-flakes.md)
 - Nix式はmodule単位に分割し、1ファイルに全設定を詰め込まないこと。
 
 ### Local Layerと秘匿情報
@@ -70,6 +72,7 @@
 - 既存の`~/.zshrc.local`読み込み互換は維持すること。
 - Home Manager moduleがあるツールは、`home.file`や`xdg.configFile`による丸ごと配置ではなく、可能な限り各`programs.*` moduleの設定項目を使うこと。
 - NixでinstallできるCLI toolやアプリ依存は、可能な限りHome Managerの`home.packages`または各`programs.*` moduleで管理すること。
+- Ghosttyは`programs.ghostty.enable = true`でアプリ本体も管理し、`aarch64-darwin`で既定packageがbuildできることを検証すること。利用不可の場合は設定だけ管理するfallbackを入れず、代替方針をADRで決めること。
 
 ### 運用と検証
 
@@ -179,12 +182,17 @@ jq -s '.[0] * .[1]' \
 ### flake outputs案
 
 ```nix
-{
+outputs = { self, nixpkgs, home-manager, ... }: {
   homeConfigurations."kakudo" = home-manager.lib.homeManagerConfiguration {
     pkgs = nixpkgs.legacyPackages.aarch64-darwin;
     modules = [
       ./home
     ];
+  };
+
+  apps.aarch64-darwin.apply = {
+    type = "app";
+    program = "${self.homeConfigurations.kakudo.activationPackage}/activate";
   };
 }
 ```
@@ -192,10 +200,10 @@ jq -s '.[0] * .[1]' \
 想定コマンド:
 
 ```sh
-nix run github:nix-community/home-manager -- switch --flake .#kakudo
+nix run .#apply
 ```
 
-Home Manager適用後は`home-manager switch --flake .#kakudo`も使える。
+Home Manager適用後も`nix run .#apply`を標準の適用コマンドにする。`home-manager switch --flake .#kakudo`は補助的なコマンドとして使える。
 
 ## 実装手順
 
@@ -208,12 +216,12 @@ Home Manager適用後は`home-manager switch --flake .#kakudo`も使える。
 3. `flake.nix`、`flake.lock`、`home/default.nix`を追加する。
 4. Home Manager moduleを分割して、chezmoi管理対象を移植する。
 5. local layer includeとJSON mergeを実装する。
-6. `nix flake check`と`nix run github:nix-community/home-manager -- build --flake .#kakudo`で検証する。
-7. 実機で`nix run github:nix-community/home-manager -- switch --flake .#kakudo`を適用し、chezmoi管理を停止する。
+6. `nix flake check`と`nix build .#homeConfigurations.kakudo.activationPackage`で検証する。
+7. 実機で`nix run .#apply`を適用し、chezmoi管理を停止する。
 
 ## 完了条件
 
-- `nix run github:nix-community/home-manager -- build --flake .#kakudo`または`home-manager build --flake .#kakudo`が成功する。
+- `nix build .#homeConfigurations.kakudo.activationPackage`が成功する。
 - 現在chezmoiで管理している対象dotfilesの内容が、Home Manager管理下で再現されている。
 - 職場PC専用情報を含むファイルがGit管理対象に含まれていない。
 - local JSONがある場合、共通JSONとmergeされた最終JSONが生成される。
