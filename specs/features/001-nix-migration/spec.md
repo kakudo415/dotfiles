@@ -47,8 +47,11 @@
 - 第一段階ではHome Manager単体で管理し、nix-darwinは導入しないこと。[ADR](./adr/home-manager-and-flakes.md)
 - Flakesを採用し、`flake.nix`と`flake.lock`でHome Manager構成を管理すること。[ADR](./adr/home-manager-and-flakes.md)
 - `flake.lock`はコミットし、複数PCで同じ入力バージョンを使うこと。
-- 初回適用と通常適用の入口は、flake内の`apps.aarch64-darwin.apply`からHome Manager activation packageを実行する`nix run .#apply`に統一すること。[ADR](./adr/home-manager-and-flakes.md)
+- `nixpkgs`と`home-manager`は`26.05` release系に揃えること。[ADR](./adr/home-manager-and-flakes.md)
+- 初回適用は、flake内の`apps.aarch64-darwin.home-manager`から`flake.lock`で固定されたHome Manager CLIを実行すること。[ADR](./adr/home-manager-and-flakes.md)
+- 通常適用は`home-manager switch --flake .#kakudo --impure`を標準コマンドにすること。[ADR](./adr/home-manager-and-flakes.md)
 - `home.stateVersion`は初回導入時のHome Manager互換性基準として`26.05`に固定し、通常のinput更新では変更しないこと。[ADR](./adr/home-manager-and-flakes.md)
+- `home.username`と`home.homeDirectory`は実行者の`USER`と`HOME`から取得し、個人PC/職場PCでユーザー名やホームディレクトリが異なっても公開リポジトリにその値を含めないこと。[ADR](./adr/home-manager-and-flakes.md)
 - Nix式はmodule単位に分割し、1ファイルに全設定を詰め込まないこと。
 
 ### Local Layerと秘匿情報
@@ -186,24 +189,40 @@ outputs = { self, nixpkgs, home-manager, ... }: {
   homeConfigurations."kakudo" = home-manager.lib.homeManagerConfiguration {
     pkgs = nixpkgs.legacyPackages.aarch64-darwin;
     modules = [
+      {
+        home.username = builtins.getEnv "USER";
+        home.homeDirectory = builtins.getEnv "HOME";
+        assertions = [
+          {
+            assertion = builtins.getEnv "USER" != "" && builtins.getEnv "HOME" != "";
+            message = "USER and HOME must be available. Run Home Manager commands with --impure.";
+          }
+        ];
+      }
       ./home
     ];
   };
 
-  apps.aarch64-darwin.apply = {
+  apps.aarch64-darwin.home-manager = {
     type = "app";
-    program = "${self.homeConfigurations.kakudo.activationPackage}/activate";
+    program = "${home-manager.packages.aarch64-darwin.home-manager}/bin/home-manager";
   };
 }
 ```
 
-想定コマンド:
+初回適用コマンド:
 
 ```sh
-nix run .#apply
+nix run .#home-manager -- switch --flake .#kakudo --impure
 ```
 
-Home Manager適用後も`nix run .#apply`を標準の適用コマンドにする。`home-manager switch --flake .#kakudo`は補助的なコマンドとして使える。
+Home Manager適用後の標準コマンド:
+
+```sh
+home-manager switch --flake .#kakudo --impure
+```
+
+`--impure`は、`home.username`と`home.homeDirectory`を実行者の`USER`と`HOME`から取得するために必要である。local layerの設定ファイルはNix評価時に読まない。
 
 ## 実装手順
 
@@ -216,12 +235,12 @@ Home Manager適用後も`nix run .#apply`を標準の適用コマンドにする
 3. `flake.nix`、`flake.lock`、`home/default.nix`を追加する。
 4. Home Manager moduleを分割して、chezmoi管理対象を移植する。
 5. local layer includeとJSON mergeを実装する。
-6. `nix flake check`と`nix build .#homeConfigurations.kakudo.activationPackage`で検証する。
-7. 実機で`nix run .#apply`を適用し、chezmoi管理を停止する。
+6. `nix flake check --impure`と`nix run .#home-manager -- build --flake .#kakudo --impure`で検証する。
+7. 実機で`nix run .#home-manager -- switch --flake .#kakudo --impure`を初回適用し、chezmoi管理を停止する。
 
 ## 完了条件
 
-- `nix build .#homeConfigurations.kakudo.activationPackage`が成功する。
+- `nix run .#home-manager -- build --flake .#kakudo --impure`または`home-manager build --flake .#kakudo --impure`が成功する。
 - 現在chezmoiで管理している対象dotfilesの内容が、Home Manager管理下で再現されている。
 - 職場PC専用情報を含むファイルがGit管理対象に含まれていない。
 - local JSONがある場合、共通JSONとmergeされた最終JSONが生成される。
