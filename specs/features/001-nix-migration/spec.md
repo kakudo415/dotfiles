@@ -23,11 +23,11 @@
 | `dot_bashrc` | `programs.bash.initExtra` | git completion/promptはNixの`git`パッケージ由来のファイルを参照する。末尾でlocal bashrcをsourceする。 |
 | `dot_zshrc` | `programs.zsh.initContent` | 既存の`~/.zshrc.local`読み込みを維持し、末尾でlocal zshrcをsourceする。 |
 | `dot_config/git/config.tmpl` | `programs.git` | 共通Git設定を移植する。GPG signing keyや職場Git設定はGit includeでlocal layerへ分離する。 |
-| `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。local ignoreが必要な場合はGit include先で扱う。 |
+| `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。 |
 | `dot_config/tmux/tmux.conf` | `programs.tmux.extraConfig` | 既存設定をそのまま移植する。 |
 | `dot_config/nvim/init.vim` | `programs.neovim.extraConfig` | まずは挙動維持を優先し、プラグイン管理は別タスクにする。local vimscriptが必要な場合は末尾でsourceする。 |
 | `dot_config/ghostty/config` | `programs.ghostty.settings` | fontやopacity設定を維持する。 |
-| `dot_config/gdb/gdbinit` | `programs.gdb.initExtra` | 既存の`set disassembly-flavor intel`を移植する。 |
+| `dot_config/gdb/gdbinit` | `home/modules/gdb.nix` | Home Manager公式moduleがないため、自前moduleで`~/.config/gdb/gdbinit`を生成する。 |
 | `dot_claude/settings.json` | `home/modules/claude.nix` + `home/modules/json-merge.nix` | Home Manager公式moduleがないため、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeする。 |
 
 ## 要求事項
@@ -37,7 +37,8 @@
 - 現在chezmoiで配置している対象ファイルをHome Managerで配置または生成できること。
 - 複数PCを同じリポジトリから管理できること。
 - 対象PCはmacOSのみとし、systemは`aarch64-darwin`のみを対象にすること。[ADR](./adr/home-manager-and-flakes.md)
-- GUIアプリとフォントは第一段階の管理対象外にすること。
+- Home Manager moduleで管理できるGUIアプリは、アプリ本体もHome Managerで管理すること。
+- フォントは第一段階の管理対象外にすること。
 - 移行直後は挙動維持を優先し、Neovimプラグイン管理やmacOS defaults管理などの拡張は今回の実装対象外にすること。
 
 ### NixとHome Manager
@@ -56,6 +57,7 @@
 - GPG signing key、職場Gitメール、職場用credential/helper、職場固有PATH、社内ツール設定などはローカル完結のファイルまたはsecret管理から参照できること。
 - local-onlyファイルのパスは`$XDG_CONFIG_HOME/local/`にすること。`XDG_CONFIG_HOME`が未設定の場合は`~/.config/local/`を使うこと。[ADR](./adr/local-layer.md)
 - local layerの標準設定ファイルが存在しない場合は、shell/Git向けには空ファイル、JSON向けには`{}`を入れたファイルを作成すること。
+- Home Manager activationでは、local layer初期化をJSON mergeより先に実行すること。
 
 ### JSON設定
 
@@ -106,8 +108,7 @@ $XDG_CONFIG_HOME/local/
 │   ├── bashrc
 │   └── zshrc
 ├── git
-│   ├── config
-│   └── ignore
+│   └── config
 ├── claude
 │   └── settings.json
 └── README.local.md
@@ -191,8 +192,10 @@ jq -s '.[0] * .[1]' \
 想定コマンド:
 
 ```sh
-home-manager switch --flake .#kakudo
+nix run github:nix-community/home-manager -- switch --flake .#kakudo
 ```
+
+Home Manager適用後は`home-manager switch --flake .#kakudo`も使える。
 
 ## 実装手順
 
@@ -205,12 +208,12 @@ home-manager switch --flake .#kakudo
 3. `flake.nix`、`flake.lock`、`home/default.nix`を追加する。
 4. Home Manager moduleを分割して、chezmoi管理対象を移植する。
 5. local layer includeとJSON mergeを実装する。
-6. `nix flake check`と`home-manager build --flake .#kakudo`で検証する。
-7. 実機で`home-manager switch --flake .#kakudo`を適用し、chezmoi管理を停止する。
+6. `nix flake check`と`nix run github:nix-community/home-manager -- build --flake .#kakudo`で検証する。
+7. 実機で`nix run github:nix-community/home-manager -- switch --flake .#kakudo`を適用し、chezmoi管理を停止する。
 
 ## 完了条件
 
-- `home-manager build --flake .#kakudo`が成功する。
+- `nix run github:nix-community/home-manager -- build --flake .#kakudo`または`home-manager build --flake .#kakudo`が成功する。
 - 現在chezmoiで管理している対象dotfilesの内容が、Home Manager管理下で再現されている。
 - 職場PC専用情報を含むファイルがGit管理対象に含まれていない。
 - local JSONがある場合、共通JSONとmergeされた最終JSONが生成される。

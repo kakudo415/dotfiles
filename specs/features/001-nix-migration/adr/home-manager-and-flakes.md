@@ -23,6 +23,7 @@
 ## Consequences
 
 - macOSのシステム設定やHomebrew caskは第一段階では対象外にする。
+- Home Manager moduleで管理できるGUIアプリは、アプリ本体もHome Managerで管理する。
 - NixでinstallできるCLI toolやアプリ依存は、Home Managerの`home.packages`または`programs.*` moduleで管理する。
 - `flake.lock`はコミットし、複数PCで同じ入力バージョンを使う。
 - 将来、macOS defaults、フォント、Homebrew cask、Touch ID sudo、Dock設定などを管理したくなった場合はnix-darwin導入を再検討する。
