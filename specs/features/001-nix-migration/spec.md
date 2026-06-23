@@ -38,7 +38,7 @@
 - 複数PCを同じリポジトリから管理できること。
 - 対象PCはmacOSのみとし、systemは`aarch64-darwin`のみを対象にすること。[ADR](./adr/home-manager-and-flakes.md)
 - GUIアプリとフォントは第一段階の管理対象外にすること。
-- 移行直後は挙動維持を優先し、Neovimプラグイン管理やmacOS defaults管理などの拡張は後続フェーズに回すこと。
+- 移行直後は挙動維持を優先し、Neovimプラグイン管理やmacOS defaults管理などの拡張は今回の実装対象外にすること。
 
 ### NixとHome Manager
 
@@ -55,6 +55,7 @@
 - 職場PC専用の設定ファイルは、公開flakeのNix評価時に読み込まないこと。
 - GPG signing key、職場Gitメール、職場用credential/helper、職場固有PATH、社内ツール設定などはローカル完結のファイルまたはsecret管理から参照できること。
 - local-onlyファイルのパスは`$XDG_CONFIG_HOME/local/`にすること。`XDG_CONFIG_HOME`が未設定の場合は`~/.config/local/`を使うこと。[ADR](./adr/local-layer.md)
+- local layerの標準設定ファイルが存在しない場合は、shell/Git向けには空ファイル、JSON向けには`{}`を入れたファイルを作成すること。
 
 ### JSON設定
 
@@ -114,6 +115,8 @@ $XDG_CONFIG_HOME/local/
 
 `XDG_CONFIG_HOME`が未設定の場合は`~/.config/local/`を使う。
 
+local layerの標準設定ファイルが存在しない場合は、Home Manager activation時に作成する。shell/Git向けは空ファイル、JSON向けは`{}`を入れたファイルにする。
+
 Git/GPGの分離:
 
 - 共通設定: `user.name`、公開用GitHub noreplyメール、`core.editor`、global ignore
@@ -128,8 +131,8 @@ JSON設定ファイルを持つツールは、Home Managerのactivation時に共
 - local JSONは`$XDG_CONFIG_HOME/local/<tool>/<file>.json`に置く。
 - Nix評価時にlocal JSONを読まない。
 - `home.file`や`xdg.configFile`で最終出力先を直接管理しない。Home Managerのactivation scriptで`jq`を使って最終ファイルを生成する。
-- local JSONが存在しない場合は、共通JSONだけで最終ファイルを生成する。
 - merge ruleは、まずlocal側がcommon側を上書きする方式にする。配列もlocal側で上書きする。
+- local JSONが存在しない場合は、空JSON objectのファイルを作成してからmergeする。
 - merge結果はホームディレクトリ配下に作られ、Nix storeには入れない。
 
 例:
@@ -164,6 +167,7 @@ jq -s '.[0] * .[1]' \
 │   └── features
 │       └── 001-nix-migration
 │           ├── spec.md
+│           ├── implementation.md
 │           └── adr
 │               ├── nix-installer.md
 │               ├── home-manager-and-flakes.md
@@ -192,61 +196,17 @@ home-manager switch --flake .#kakudo
 
 ## 実装手順
 
-1. 事前バックアップ
-   - 現在の`~/.bashrc`、`~/.zshrc`、`~/.config/git/config`、`~/.config/tmux/tmux.conf`などを確認する。
-   - Home Manager初回適用時に衝突する既存ファイルは退避する。
+詳細な実装手順は[implementation.md](./implementation.md)に記録する。
 
-2. Nix/Home Managerの入口を作る
-   - 公式Nix installerでmacOSへNixを導入する。
-   - `flake.nix`を追加する。
-   - inputは`nixpkgs`と`home-manager`から始める。
-   - `home-manager.inputs.nixpkgs.follows = "nixpkgs"`を設定する。
-   - `flake.lock`を生成してコミット対象にする。
+大まかな順序:
 
-3. 共通Home Manager moduleを作る
-   - `home/default.nix`で共通moduleをimportする。
-   - `home.stateVersion`を明示する。値は初回導入時のHome Manager releaseに固定し、安易に更新しない。
-   - `programs.home-manager.enable = true`を設定する。
-
-4. shell設定を移行する
-   - bash/zshの既存プロンプト、履歴、aliasを移植する。
-   - `git-prompt.sh`と`git-completion.sh`は`pkgs.git`由来のパスを使う。
-   - `lsd`は`home.packages`に追加する。
-   - `~/.zshrc.local`互換に加え、`${XDG_CONFIG_HOME:-$HOME/.config}/local/shell/*`を読む。
-
-5. Git設定を移行する
-   - `programs.git.enable = true`を設定する。
-   - 共通の`user.name`、公開メール、editorを移す。
-   - GPG signing keyは公開設定から外し、`${XDG_CONFIG_HOME:-$HOME/.config}/local/git/config`で設定する。
-   - global ignoreを移す。
-
-6. ツール設定を移行する
-   - tmuxは`programs.tmux.extraConfig`へ移す。
-   - Neovimはまず既存`init.vim`相当を再現する。
-   - Ghosttyは`programs.ghostty.settings`へ移す。
-   - gdbは`programs.gdb.initExtra`へ移す。
-   - ClaudeなどHome Manager公式moduleがないJSON設定は、自前moduleのactivation scriptで共通JSONとlocal JSONをmergeして配置する。
-
-7. package管理を追加する
-   - Nixでinstallできるものは可能な限り`home.packages`またはHome Managerの`programs.*` moduleで管理する。
-   - 初期package候補は`git`、`tmux`、`neovim`、`gdb`、`lsd`、`jq`、`gnupg`、`rust-analyzer`。
-   - GUIアプリやフォントは第一段階では管理しない。
-
-8. 検証する
-   - `nix flake check`
-   - `home-manager build --flake .#kakudo`
-   - 生成結果の主要ファイルを`result/home-files`以下で確認する。
-   - 実機適用は片方のPCで`home-manager switch --flake .#kakudo`を実行し、問題がなければもう一方へ進める。
-
-9. chezmoiから切り替える
-   - Home Manager適用後にchezmoi管理を停止する。
-   - `.chezmoi.toml.tmpl`と`.chezmoiignore`は移行完了後に削除する。
-   - READMEをNix/Home Managerの導入手順に更新する。
-
-10. 後続フェーズを判断する
-    - macOS defaults、フォント、Homebrew cask、Touch ID sudo、Dock設定などを管理したくなった場合にnix-darwin導入を再検討する。
-    - secretをGitで暗号化管理したくなった場合はsops-nixまたはagenixを導入する。
-    - private Nix moduleが必要になった場合は、公開リポジトリとは別にprivate flakeまたはprivate repositoryを作る。
+1. 既存dotfilesと衝突ファイルを確認する。
+2. 公式Nix installerでNixを導入し、Flakesを有効化する。
+3. `flake.nix`、`flake.lock`、`home/default.nix`を追加する。
+4. Home Manager moduleを分割して、chezmoi管理対象を移植する。
+5. local layer includeとJSON mergeを実装する。
+6. `nix flake check`と`home-manager build --flake .#kakudo`で検証する。
+7. 実機で`home-manager switch --flake .#kakudo`を適用し、chezmoi管理を停止する。
 
 ## 完了条件
 
