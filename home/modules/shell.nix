@@ -97,8 +97,6 @@ in
           alias ls='lsd'
       fi
 
-      [ -f ~/.zshrc.local ] && . ~/.zshrc.local
-
       local_zshrc="''${XDG_CONFIG_HOME:-$HOME/.config}/local/shell/zshrc"
       [ -r "$local_zshrc" ] && . "$local_zshrc"
     '';

@@ -21,7 +21,7 @@
 | `.chezmoi.toml.tmpl` | 廃止 | GPG key ID入力はGit local layerまたはsecret管理へ移す。 |
 | `.chezmoiignore` | 廃止 | Nix移行後は不要。 |
 | `dot_bashrc` | `programs.bash.initExtra` | git completion/promptはNixの`git`パッケージ由来のファイルを参照する。末尾でlocal bashrcをsourceする。 |
-| `dot_zshrc` | `programs.zsh.initContent` | 既存の`~/.zshrc.local`読み込みを維持し、末尾でlocal zshrcをsourceする。 |
+| `dot_zshrc` | `programs.zsh.initContent` | 末尾でlocal zshrcをsourceする。`~/.zshrc.local`互換読み込みはlocal layerへ移行したため廃止する。 |
 | `dot_config/git/config.tmpl` | `programs.git` | 共通Git設定を移植する。GPG signing keyや職場Git設定はGit includeでlocal layerへ分離する。 |
 | `dot_config/git/ignore` | `programs.git.ignores` | `.DS_Store`を維持する。 |
 | `dot_config/tmux/tmux.conf` | `programs.tmux.extraConfig` | 既存設定をそのまま移植する。 |
@@ -72,7 +72,7 @@
 
 ### Shellとツール設定
 
-- 既存の`~/.zshrc.local`読み込み互換は維持すること。
+- zshのlocal設定は`$XDG_CONFIG_HOME/local/shell/zshrc`に一本化し、`~/.zshrc.local`読み込み互換は廃止すること。
 - Home Manager moduleがあるツールは、`home.file`や`xdg.configFile`による丸ごと配置ではなく、可能な限り各`programs.*` moduleの設定項目を使うこと。
 - NixでinstallできるCLI toolやアプリ依存は、可能な限りHome Managerの`home.packages`または各`programs.*` moduleで管理すること。
 - Ghosttyは`aarch64-darwin`で既定packageがbuildできることを検証すること。nixpkgs 26.05で利用不可だったため、第一段階では[ADR](./adr/ghostty-on-darwin.md)に従い、アプリ本体はHome Manager管理対象から外し、設定ファイルのみを生成する。

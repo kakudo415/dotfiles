@@ -223,16 +223,16 @@ programs.zsh.initContent
 移植内容:
 
 - `programs.zsh.shellAliases`: `ll`、`la`
-- `programs.zsh.initContent`: `PROMPT_SUBST`、git prompt、prompt、既存の`~/.zshrc.local`互換、local zshrc source
+- `programs.zsh.initContent`: `PROMPT_SUBST`、git prompt、prompt、local zshrc source
 
 local zshrc:
 
 ```sh
-[ -f ~/.zshrc.local ] && . ~/.zshrc.local
-
 local_zshrc="${XDG_CONFIG_HOME:-$HOME/.config}/local/shell/zshrc"
 [ -r "$local_zshrc" ] && . "$local_zshrc"
 ```
+
+`~/.zshrc.local`読み込み互換は、local layer導入後は廃止する。
 
 ### git prompt/completion
 
