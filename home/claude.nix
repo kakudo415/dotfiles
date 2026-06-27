@@ -1,0 +1,12 @@
+{
+  home.file.".claude/settings.json".text = ''
+    {
+        "env": {
+            "EDITOR": "nvim",
+            "DISABLE_ERROR_REPORTING": 1,
+            "DISABLE_TELEMETRY": 1
+        },
+        "includeCoAuthoredBy": false
+    }
+  '';
+}

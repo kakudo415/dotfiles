@@ -1,0 +1,28 @@
+{ pkgs, ... }:
+
+{
+  imports = [
+    ./bash.nix
+    ./claude.nix
+    ./fonts.nix
+    ./git.nix
+    ./ghostty.nix
+    ./neovim.nix
+    ./tmux.nix
+    ./zsh.nix
+  ];
+
+  home = {
+    username = "kakudo";
+    homeDirectory = "/Users/kakudo";
+    stateVersion = "26.05";
+    enableNixpkgsReleaseCheck = false;
+
+    packages = with pkgs; [
+      ghostty-bin
+      lsd
+    ];
+  };
+
+  programs.home-manager.enable = true;
+}
