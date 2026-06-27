@@ -33,6 +33,7 @@ Nix、Home Manager、Nix Flakesを使う構成へ移行し、chezmoiで管理し
 - 移行後はchezmoi関連ファイルをリポジトリから削除する。
 - 次の項目は移行対象に含めない。
   - GPG署名設定。署名設定のないGit設定へ移行する。
+  - GDB設定
   - Sura設定
   - Rust関連設定
   - Zshのローカル拡張設定
@@ -59,6 +60,7 @@ Nix、Home Manager、Nix Flakesを使う構成へ移行し、chezmoiで管理し
 - `programs.home-manager.enable = true` を設定する。
 - 標準moduleで表現できる設定は、可能な限りHome Managerのmoduleで管理する。
 - 標準moduleで表現しづらい設定は `home.file` または `xdg.configFile` で管理する。
+- Home Manager設定は責務単位で分割し、プログラムごとに独立したmodule fileとして管理する。
 
 ### Packages
 
@@ -68,20 +70,28 @@ Nix、Home Manager、Nix Flakesを使う構成へ移行し、chezmoiで管理し
   - `bash`
   - `tmux`
   - `neovim`
-  - `gdb`
-  - `ghostty`
+  - `ghostty-bin`
   - `lsd`
-  - Claude関連ツール
-- Cica fontはHome Managerで用意する対象に含めない。
+- `git`、`zsh`、`bash`、`tmux`、`neovim` は可能な限り対応する `programs.*` moduleによって導入する。
+- `ghostty` は `aarch64-darwin` で利用可能なNixpkgs packageとして `ghostty-bin` を使用する。
+- Cica fontはHome Managerで用意する対象に含める。
+- Cica fontがNixpkgs packageとして利用できない場合、リポジトリ内にCica用packageを定義する。
+- Cica font sourceは `https://github.com/miiton/Cica/releases/download/v5.0.3/Cica_v5.0.3.zip` とする。
+- Cica font source hashは `sha256-BtDnfWCfD9NE8tcWSmk8ciiInsspNPTPmAdGzpg62SM=` とする。
+- Cica fontは `~/Library/Fonts` に配置され、macOSアプリケーションから参照できるようにする。
 
 ### Shell
 
 - Zshのprompt、Git branch表示、aliasを維持する。
+- Zsh設定は `~/.config/zsh/.zshrc` に配置する。
+- Zshが `~/.config/zsh/.zshrc` を読むために必要な `~/.zshenv` はHome Managerで管理する。
 - Bashのinteractive判定、prompt、Git branch表示、履歴設定、aliasを維持する。
-- `lsd` が利用可能な場合に `ls` aliasを切り替える挙動を維持する。
+- `lsd` はHome Managerで導入されるため、Bash/Zshとも `ls` aliasは無条件に `lsd` へ設定する。
 - `~/.cargo/env` の読み込みは移行しない。
 - `~/.zshrc.local` の読み込みは移行しない。
 - 既存設定が参照する `git-prompt.sh` と `git-completion.sh` は、Home ManagerでインストールするGit packageから参照する。
+- Bash/Zshのalias、履歴、shell optionなど、Home Manager moduleで表現できる設定は `programs.bash` / `programs.zsh` の設定として管理する。
+- Promptなど標準moduleで表現しづらい設定のみ、各shell moduleの追加設定として管理する。
 
 ### Git
 
@@ -95,15 +105,17 @@ Nix、Home Manager、Nix Flakesを使う構成へ移行し、chezmoiで管理し
 ### tmux
 
 - 既存のprefix、pane移動、pane resize、index、history、status line、色設定を維持する。
+- tmux本体とHome Manager moduleで表現できる設定は `programs.tmux` で管理する。
+- `prefix`、`baseIndex`、`escapeTime`、`historyLimit`、`keyMode`、pane移動、pane resizeは `programs.tmux` のmodule optionで管理する。
+- status line、色、pane borderなどmodule optionで表現しづらい設定のみ `programs.tmux.extraConfig` で管理する。
 
 ### Neovim
 
 - 既存の `init.vim` の設定内容を維持する。
-- Neovim本体をHome Managerで管理する場合も、既存設定の配置先は `~/.config/nvim/init.vim` とする。
-
-### GDB
-
-- `set disassembly-flavor intel` を維持する。
+- Neovim本体は `programs.neovim` で管理する。
+- 既存の `init.vim` の設定内容は `programs.neovim.extraConfig` で管理する。
+- Home ManagerがNeovim用の `init.lua` を `~/.config/nvim/init.lua` として配置しないようにする。
+- `~/.config/nvim/init.vim` を直接配置することは要求しない。
 
 ### Ghostty
 
@@ -112,11 +124,14 @@ Nix、Home Manager、Nix Flakesを使う構成へ移行し、chezmoiで管理し
 ### Claude
 
 - 既存の環境変数設定と `includeCoAuthoredBy = false` を維持する。
+- 既存chezmoi管理対象である `~/.claude/settings.json` のみを移行対象とする。
 
 ## 非機能要件
 
 - 秘密情報、秘密鍵、トークンをGit管理対象やNix storeに含めない。
-- 移行対象外に定めるものを除き、既存chezmoi出力と同じ設定ファイルとソフトウェアを用意できるようにする。
+- 移行対象外に定めるもの、およびHome Manager module管理へ寄せるために配置先が変わるものを除き、既存chezmoi出力と同等の設定とソフトウェアを用意できるようにする。
 - Nix設定は責務単位で分割し、単一ファイルに過度に集約しない。
 - `nix flake check` が成功することを検証条件とする。
 - `home-manager build` が成功することを検証条件とする。
+- 初回適用手順は `nix run github:nix-community/home-manager/release-26.05 -- switch --flake .#kakudo` とする。
+- 検証時に `apps.aarch64-darwin.home-manager` のような補助outputは定義しない。
