@@ -3,14 +3,13 @@
 {
   imports = [
     ./agents
-    ./bash.nix
     ./fonts.nix
     ./gpg.nix
     ./git.nix
     ./ghostty.nix
     ./neovim.nix
+    ./shell
     ./tmux.nix
-    ./zsh.nix
   ];
 
   home = {

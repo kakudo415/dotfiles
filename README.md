@@ -2,7 +2,9 @@
 
 dotfiles for kakudo415, managed by Nix Flakes and Home Manager.
 
-## Bootstrap
+## Setup
+
+### Bootstrap
 
 Install Nix first. On macOS, the official installer performs a multi-user
 installation by default.
@@ -25,7 +27,7 @@ file.
 experimental-features = nix-command flakes
 ```
 
-## First Apply
+### First Apply
 
 Use Home Manager from its release flake for the first activation. This does not
 require `home-manager` to already be installed in the user environment. Existing
@@ -35,7 +37,7 @@ files are backed up with a date-based extension, such as `backup-20260628`.
 nix run github:nix-community/home-manager/release-26.05 -- switch --flake .#kakudo -b "backup-$(date +%Y%m%d)"
 ```
 
-## Daily Apply
+### Daily Apply
 
 After the first successful activation, this configuration installs the
 `home-manager` command via `programs.home-manager.enable`.
@@ -47,7 +49,18 @@ home-manager switch --flake .#kakudo
 You can also keep using the first-apply command for an explicitly pinned Home
 Manager runner.
 
-## Local Git Config
+### Update
+
+Update flake inputs before applying the refreshed configuration.
+
+```sh
+nix flake update
+home-manager switch --flake .#kakudo
+```
+
+## Git
+
+### Local Config
 
 Git reads `$XDG_CONFIG_HOME/git/config.local` after the Home Manager generated
 config. Use it for machine-local settings that should not be committed to this
@@ -59,7 +72,7 @@ when GnuPG can select a secret key that matches the Git author email.
 	insteadOf = https://github.com/
 ```
 
-## GPG Signing
+### GPG Signing
 
 Git commit and tag signing are enabled by default. Home Manager installs and
 configures GnuPG, gpg-agent, and pinentry-mac, but it does not create or upload
@@ -91,12 +104,4 @@ After the key is registered, verify local signing.
 ```sh
 git commit --allow-empty -m "Verify GPG signing"
 git log --show-signature -1
-```
-
-## Verify
-
-```sh
-nix flake check
-nix build .#homeConfigurations.kakudo.activationPackage
-nix run github:nix-community/home-manager/release-26.05 -- build --flake .#kakudo
 ```

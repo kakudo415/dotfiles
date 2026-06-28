@@ -4,6 +4,14 @@
   stdenvNoCC,
 }:
 
+let
+  cicaFonts = [
+    "Cica-Regular.ttf"
+    "Cica-RegularItalic.ttf"
+    "Cica-Bold.ttf"
+    "Cica-BoldItalic.ttf"
+  ];
+in
 stdenvNoCC.mkDerivation rec {
   pname = "cica";
   version = "5.0.3";
@@ -16,13 +24,14 @@ stdenvNoCC.mkDerivation rec {
 
   dontBuild = true;
 
+  passthru.fonts = cicaFonts;
+
   installPhase = ''
     runHook preInstall
 
-    install -Dm644 Cica-Regular.ttf "$out/share/fonts/truetype/Cica-Regular.ttf"
-    install -Dm644 Cica-RegularItalic.ttf "$out/share/fonts/truetype/Cica-RegularItalic.ttf"
-    install -Dm644 Cica-Bold.ttf "$out/share/fonts/truetype/Cica-Bold.ttf"
-    install -Dm644 Cica-BoldItalic.ttf "$out/share/fonts/truetype/Cica-BoldItalic.ttf"
+    ${lib.concatMapStringsSep "\n    " (
+      font: ''install -Dm644 ${font} "$out/share/fonts/truetype/${font}"''
+    ) cicaFonts}
     install -Dm644 LICENSE.txt "$out/share/doc/${pname}/LICENSE.txt"
     install -Dm644 COPYRIGHT.txt "$out/share/doc/${pname}/COPYRIGHT.txt"
 

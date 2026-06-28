@@ -1,4 +1,4 @@
-name: Lint
+name: Checks
 
 on:
   pull_request:
@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  format-lint:
-    name: Format and lint
+  flake-check:
+    name: Flake check
     runs-on: macos-14
     steps:
       - name: Checkout

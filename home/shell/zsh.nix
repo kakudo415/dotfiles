@@ -1,5 +1,8 @@
 { config, lib, ... }:
 
+let
+  shellCommon = import ./common.nix;
+in
 {
   programs.zsh = {
     enable = true;
@@ -10,20 +13,13 @@
       "PROMPT_SUBST"
     ];
 
-    shellAliases = {
-      ls = "lsd";
-      ll = "ls -alF";
-      la = "ls -A";
-    };
+    inherit (shellCommon) shellAliases;
 
     initContent = lib.mkOrder 1000 ''
       # Prompt
       # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
       . ~/.config/git/git-prompt.sh
-      GIT_PS1_SHOWDIRTYSTATE=1
-      GIT_PS1_SHOWSTASHSTATE=1
-      GIT_PS1_SHOWUNTRACKEDFILES=1
-      GIT_PS1_SHOWUPSTREAM='auto'
+      ${shellCommon.gitPromptEnvironment}
 
       if type __git_ps1 > /dev/null 2>&1; then
       PS1=$'
