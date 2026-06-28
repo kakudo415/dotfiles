@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   xdg = {
@@ -12,8 +12,18 @@
   programs.git = {
     enable = true;
     package = pkgs.git;
+    signing = {
+      format = "openpgp";
+      key = null;
+      signByDefault = true;
+    };
     ignores = [
       ".DS_Store"
+    ];
+    includes = [
+      {
+        path = "${config.xdg.configHome}/git/config.local";
+      }
     ];
     settings = {
       user = {

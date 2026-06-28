@@ -5,6 +5,7 @@
     ./bash.nix
     ./claude.nix
     ./fonts.nix
+    ./gpg.nix
     ./git.nix
     ./ghostty.nix
     ./neovim.nix
@@ -21,6 +22,7 @@
     packages = with pkgs; [
       ghostty-bin
       lsd
+      pinentry_mac
     ];
   };
 

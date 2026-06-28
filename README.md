@@ -47,6 +47,52 @@ home-manager switch --flake .#kakudo
 You can also keep using the first-apply command for an explicitly pinned Home
 Manager runner.
 
+## Local Git Config
+
+Git reads `$XDG_CONFIG_HOME/git/config.local` after the Home Manager generated
+config. Use it for machine-local settings that should not be committed to this
+repository. This file is optional; GPG signing works without `user.signingKey`
+when GnuPG can select a secret key that matches the Git author email.
+
+```ini
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+```
+
+## GPG Signing
+
+Git commit and tag signing are enabled by default. Home Manager installs and
+configures GnuPG, gpg-agent, and pinentry-mac, but it does not create or upload
+GPG keys.
+
+Check whether a signing-capable secret key already exists for the Git email
+address.
+
+```sh
+gpg --list-secret-keys --keyid-format=long 31888089+kakudo415@users.noreply.github.com
+```
+
+If no suitable key exists, create one. Use `31888089+kakudo415@users.noreply.github.com`
+as the email address.
+
+```sh
+gpg --full-generate-key
+```
+
+Export the public key and register it in GitHub Settings > SSH and GPG keys.
+Replace `KEY_ID` with the long key ID shown by `gpg --list-secret-keys`.
+
+```sh
+gpg --armor --export KEY_ID
+```
+
+After the key is registered, verify local signing.
+
+```sh
+git commit --allow-empty -m "Verify GPG signing"
+git log --show-signature -1
+```
+
 ## Verify
 
 ```sh
