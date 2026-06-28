@@ -2,8 +2,8 @@
 
 {
   imports = [
+    ./agents
     ./bash.nix
-    ./claude.nix
     ./fonts.nix
     ./gpg.nix
     ./git.nix
