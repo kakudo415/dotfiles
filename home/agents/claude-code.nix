@@ -17,7 +17,9 @@
         pr = "";
         sessionUrl = false;
       };
+      effortLevel = "xhigh";
       language = "japanese";
+      theme = "dark";
       permissions = {
         allow = [
           "Bash(pwd)"

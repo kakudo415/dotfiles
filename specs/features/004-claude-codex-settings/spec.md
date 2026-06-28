@@ -48,6 +48,7 @@ Codexは本体や設定をHome Managerで導入せず、Codex GUIが読み込む
   - コードコメントには読めば分かる処理内容ではなく、理由、背景、制約、非自明なtradeoffを書く。
   - 検討した候補、最終決定、実際に実施または実装したことを明確に区別する。
   - 技術的な質問を遠回しな指示として扱わず、質問と指示を明確に区別する。
+  - 些細な不明点であっても自己判断で仮置きや仮実装をせず、作業を進める前にユーザーへ逐一確認する。
   - 変更後の成果物には最終状態だけを残し、古い状態や途中経過を残さない。
 - 共通プロンプトには秘密情報を含めない。
 - 共通プロンプトは行動ガイドとして扱い、強制的な拒否ルールは含めない。
@@ -67,7 +68,9 @@ Codexは本体や設定をHome Managerで導入せず、Codex GUIが読み込む
 - `programs.claude-code.settings.attribution.commit = ""` を設定し、Git commitのattributionを出力しない。
 - `programs.claude-code.settings.attribution.pr = ""` を設定し、Pull Requestのattributionを出力しない。
 - `programs.claude-code.settings.attribution.sessionUrl = false` を設定し、Git commitにsession URL trailerを出力しない。
+- `programs.claude-code.settings.effortLevel = "xhigh"` を設定する。
 - `programs.claude-code.settings.language = "japanese"` を設定する。
+- `programs.claude-code.settings.theme = "dark"` を設定する。
 - `programs.claude-code.settings.permissions.allow` に一般的な確認系コマンドのallow listを設定する。
 - allow listは作業ディレクトリ確認、一覧表示、Gitの確認系、Git commit、GitHub CLIの読み取り系コマンドに限定する。
 - GitHub CLIのallow listには、認証状態、repo、issue、pull request、workflow、run、releaseの確認系コマンドを含める。
@@ -118,7 +121,9 @@ Codexは本体や設定をHome Managerで導入せず、Codex GUIが読み込む
 - 生成されるClaude Codeの `settings.json` に `attribution.commit = ""` が含まれること。
 - 生成されるClaude Codeの `settings.json` に `attribution.pr = ""` が含まれること。
 - 生成されるClaude Codeの `settings.json` に `attribution.sessionUrl = false` が含まれること。
+- 生成されるClaude Codeの `settings.json` に `effortLevel = "xhigh"` が含まれること。
 - 生成されるClaude Codeの `settings.json` に `language = "japanese"` が含まれること。
+- 生成されるClaude Codeの `settings.json` に `theme = "dark"` が含まれること。
 - 生成されるClaude Codeの `settings.json` に確認系コマンドとGitHub CLIの読み取り系コマンドの `permissions.allow` が含まれること。
 - 生成されるClaude Codeの `settings.json` の `permissions.allow` にNix関連コマンドが含まれないこと。
 - 生成されるClaude Codeの `settings.json` の `permissions.allow` に削除、push、checkout、merge、edit、外部公開を行うコマンドが含まれないこと。
