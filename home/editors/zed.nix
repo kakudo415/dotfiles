@@ -16,6 +16,7 @@
 
       buffer_font_family = "Cica";
       buffer_font_size = 14;
+      buffer_line_height = "comfortable";
       ui_font_family = "Cica";
       ui_font_size = 16;
 
@@ -36,11 +37,7 @@
       ensure_final_newline_on_save = true;
       remove_trailing_whitespace_on_save = true;
 
-      show_wrap_guides = true;
-      wrap_guides = [
-        80
-        100
-      ];
+      show_wrap_guides = false;
 
       telemetry = {
         diagnostics = false;
@@ -49,9 +46,21 @@
 
       disable_ai = true;
       show_edit_predictions = false;
-      features.edit_predictions.provider = "none";
+      agent = {
+        enabled = false;
+        button = false;
+        dock = "right";
+      };
+
+      collaboration_panel = {
+        button = false;
+        dock = "left";
+      };
+      diagnostics.button = false;
+      debugger.button = false;
 
       terminal = {
+        button = true;
         font_family = "Cica";
         font_size = 14;
         shell = "system";
@@ -59,8 +68,20 @@
         working_directory = "current_project_directory";
       };
 
-      project_panel.git_status = true;
-      git_panel.status_style = "icon";
+      project_panel = {
+        button = true;
+        dock = "left";
+        git_status = true;
+      };
+      outline_panel = {
+        button = true;
+        dock = "left";
+      };
+      git_panel = {
+        button = true;
+        dock = "left";
+        status_style = "icon";
+      };
     };
   };
 }
