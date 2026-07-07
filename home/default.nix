@@ -7,7 +7,7 @@
     ./gpg.nix
     ./git.nix
     ./ghostty.nix
-    ./neovim.nix
+    ./editors
     ./shell
     ./tmux.nix
   ];
