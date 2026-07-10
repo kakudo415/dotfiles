@@ -30,6 +30,7 @@
       system = "aarch64-darwin";
       pkgs = import nixpkgs {
         inherit system;
+        config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "orbstack";
         overlays = [
           llm-agents.overlays.default
         ];
