@@ -20,6 +20,7 @@
 
     packages = with pkgs; [
       ghostty-bin
+      go
       lsd
       pinentry_mac
     ];
