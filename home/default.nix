@@ -22,6 +22,7 @@
       ghostty-bin
       go
       lsd
+      orbstack
       pinentry_mac
     ];
   };
