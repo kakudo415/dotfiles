@@ -30,9 +30,13 @@
       system = "aarch64-darwin";
       pkgs = import nixpkgs {
         inherit system;
-        config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "orbstack";
+        config.allowUnfreePredicate =
+          pkg: builtins.elem (nixpkgs.lib.getName pkg) [
+            "claude-code"
+            "orbstack"
+          ];
         overlays = [
-          llm-agents.overlays.default
+          llm-agents.overlays.shared-nixpkgs
         ];
       };
       treefmtEval = treefmt-nix.lib.evalModule pkgs {
