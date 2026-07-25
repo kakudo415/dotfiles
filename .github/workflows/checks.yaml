@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,6 +28,17 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
+      - name: Cache Nix store
+        uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ github.job }}-${{ hashFiles('flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ github.job }}-
+          gc-max-store-size-macos: 3G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-${{ github.job }}-
+          purge-created: 0
+          purge-primary-key: never
+
       - name: Run flake checks
         run: nix flake check --show-trace
 
@@ -42,6 +54,17 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+
+      - name: Cache Nix store
+        uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ github.job }}-${{ hashFiles('flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ github.job }}-
+          gc-max-store-size-macos: 3G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-${{ github.job }}-
+          purge-created: 0
+          purge-primary-key: never
 
       - name: Build activation package
         run: nix build --no-link --print-out-paths .#homeConfigurations.kakudo.activationPackage
