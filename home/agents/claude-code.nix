@@ -3,6 +3,18 @@
 let
   jsonFormat = pkgs.formats.json { };
 
+  statusLineScript = pkgs.writeShellScript "claude-code-statusline" ''
+    exec ${pkgs.jq}/bin/jq --raw-output '
+      def pct: "\(round)%";
+      [
+        "\(.model.display_name)" + (.context_window.used_percentage | if . == null then "" else ": \(pct)" end),
+        (.workspace.git_worktree // empty | "🌲 \(.)"),
+        (.rate_limits.five_hour.used_percentage // empty | "⏳ 5h: \(pct)"),
+        (.rate_limits.seven_day.used_percentage // empty | "⏳ 7d: \(pct)")
+      ] | join(" │ ")
+    '
+  '';
+
   claudeCodeSettings = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
     env = {
@@ -18,6 +30,10 @@ let
     };
     effortLevel = "xhigh";
     language = "japanese";
+    statusLine = {
+      type = "command";
+      command = "${statusLineScript}";
+    };
     theme = "dark";
     tui = "fullscreen";
     permissions = {
