@@ -62,6 +62,7 @@ let
     };
     effortLevel = "xhigh";
     language = "japanese";
+    cleanupPeriodDays = 1825; # 5 years
     statusLine = {
       type = "command";
       command = "${statusLineScript}";
