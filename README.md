@@ -51,17 +51,17 @@ Manager runner.
 
 ### Update
 
-Renovate opens a pull request for each flake input every morning, plus a lock
-file maintenance pull request once a week. They merge automatically once
-`Flake check` and `Home Manager build` pass, so `flake.lock` on `main` is
-already current most of the time. Pull the merged result before applying it.
+Renovate refreshes the whole `flake.lock` in a single pull request every
+morning. It merges automatically once `Flake check` and `Home Manager build`
+pass, so `flake.lock` on `main` is already current most of the time. Pull the
+merged result before applying it.
 
 ```sh
 git pull
 home-manager switch --flake .#kakudo
 ```
 
-To pick up an input without waiting for Renovate, update it locally.
+To pick up an update without waiting for Renovate, refresh the lock locally.
 
 ```sh
 nix flake update
@@ -72,13 +72,14 @@ home-manager switch --flake .#kakudo
 
 `flake.lock` and the action versions in `.github/workflows` are kept current by
 Renovate. The behaviour is configured in `renovate.json` and specified in
-`specs/features/009-dependency-auto-update/spec.md`.
+`specs/features/009-dependency-auto-update/spec.md` and
+`specs/features/010-lock-file-maintenance/spec.md`.
 
 ### Renovate
 
 Install the Renovate GitHub App from <https://github.com/apps/renovate> for this
-repository, then merge the `Configure Renovate` onboarding pull request it
-opens.
+repository. Renovate skips its onboarding pull request because `renovate.json`
+is already committed, and starts working on its next run.
 
 Renovate tracks held-back and failed updates in a `Dependency Dashboard` issue.
 Major updates are never merged automatically and wait there for a manual

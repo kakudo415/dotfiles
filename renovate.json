@@ -16,7 +16,7 @@
     "enabled": true,
     "automerge": true,
     "schedule": [
-      "* 4-7 * * 1"
+      "* 4-7 * * *"
     ]
   },
   "packageRules": [
@@ -24,7 +24,18 @@
       "matchManagers": [
         "nix"
       ],
-      "automerge": true
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "rollback",
+        "bump",
+        "replacement"
+      ],
+      "enabled": false
     },
     {
       "matchManagers": [
