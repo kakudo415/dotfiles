@@ -33,7 +33,7 @@ jobs:
         with:
           primary-key: nix-${{ runner.os }}-${{ github.job }}-${{ hashFiles('flake.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ github.job }}-
-          gc-max-store-size-macos: 3G
+          gc-max-store-size-macos: 6G
           purge: true
           purge-prefixes: nix-${{ runner.os }}-${{ github.job }}-
           purge-created: 0
@@ -60,7 +60,7 @@ jobs:
         with:
           primary-key: nix-${{ runner.os }}-${{ github.job }}-${{ hashFiles('flake.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ github.job }}-
-          gc-max-store-size-macos: 3G
+          gc-max-store-size-macos: 6G
           purge: true
           purge-prefixes: nix-${{ runner.os }}-${{ github.job }}-
           purge-created: 0

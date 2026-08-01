@@ -120,6 +120,9 @@ Jobごとにkeyを分けるのは、`Flake check` と `Home Manager build` でNi
 GitHub Actions cacheはbranchごとにscopeが分かれ、pull requestの実行は自身のscopeへ保存しつつdefault branchのscopeから復元できる。
 Cacheのpurgeも実行中のrefのscopeに限定されるため、pull requestの実行が `main` のcache entryを削除することはない。
 
+`nix flake check` と `nix build --no-link` はGC rootを残さないため、store size上限をbuild後のstore sizeより小さくすると、直前にbuildした成果物から回収される。
+Store size上限はbuild後のstore sizeに対して余裕を持たせ、成果物がcacheに残るようにする。
+
 GitHub Actions cacheはリポジトリあたり10GBの上限を持つため、store size上限は2つのjobが同時に保存しても上限へ届かない値にする。
 
 ### CI permissions
