@@ -11,9 +11,6 @@ GitHub Actionsで参照しているaction versionも同じく手動更新に依�
 依存更新を毎日自動でpull requestにし、既存CIのflake checkとHome Manager activation package buildが成功したものだけを自動でmainへ取り込む。
 これにより、まとめて更新したときに壊れる範囲が広がる問題を避け、壊れた場合の原因を1日分の差分に限定する。
 
-自動更新は毎日CIを実行するため、CIの実行時間がそのまま運用コストになる。
-Nix storeをGitHub Actions cacheに保存し、毎回のフル評価とフルbuildを避ける。
-
 ## 要求事項
 
 - 依存更新はRenovateのhosted GitHub Appで実行する。
@@ -25,19 +22,23 @@ Nix storeをGitHub Actions cacheに保存し、毎回のフル評価とフルbui
 - 既存CIの `Flake check` と `Home Manager build` が成功したpull requestだけを自動マージする。
 - major更新は自動マージせず、手動で確認してからマージする。
 - 自動マージの前提として `main` にbranch protectionを設定する。
-- CIはNix storeをGitHub Actions cacheに保存し、次回の実行で再利用する。
+- 既存のCI workflowは変更しない。
 - CIはsecretを必要としない。
 - Renovateが更新を保留した場合や更新に失敗した場合を追えるようにする。
 
 ## 非対象
 
-- Cachixのようにauth tokenを必要とするbinary cacheを導入すること。
+- CIにbinary cacheやNix storeのcacheを導入すること。
 - `flake.nix` の `home-manager` release branchを次のreleaseへ追従させること。
 - `pkgs/cica.nix` のfont versionとhashを自動更新すること。
 - GitHubのrepository設定やrulesetをリポジトリ内のファイルから自動適用すること。
 - `llm-agents` に `inputs.nixpkgs.follows` を設定してinput graphを変更すること。
 - 自動マージ後にローカル環境へ自動でactivationすること。
 - CIの実行環境をmacOS arm64以外へ広げること。
+
+毎日CIが走るため実行時間の短縮を検討したが、macOS runnerではNix storeのcache復元に `cache.nixos.org` からの取得と同程度の時間がかかり、job全体では短縮にならなかった。
+`nix flake check` と `nix build --no-link` はGC rootを残さないため、store size上限による回収が直前にbuildした成果物へ及ぶ点も扱いづらい。
+CIはbinary cacheを持たない現状の構成を維持し、`permissions.contents = read` のみでsecretを必要としない性質も保つ。
 
 ## 機能要件
 
@@ -104,35 +105,14 @@ required status checksを設定せずにauto-mergeを使うと、CIの結果を�
 
 required approvalsを1以上にすると、Renovateが自身のpull requestをマージできなくなる。
 
-### CI cache
+### CI
 
-- `.github/workflows/checks.yaml` の両jobで、Nix storeをGitHub Actions cacheに保存および復元する。
-- Cacheの操作には `nix-community/cache-nix-action` を使用する。
-- Cache stepはNixのinstall stepの直後に置く。
-- Cache keyにはjobと `flake.lock` のhashを含める。
-- Cacheの復元はjobまでのkey prefixで一致させる。
-- Cacheの保存前にNix storeをgarbage collectionし、macOS向けのstore size上限を指定する。
-- 古いcache entryをpurgeし、purge対象は同じkey prefixに限定する。
-- 現在のprimary keyのcache entryはpurgeしない。
-
-Jobごとにkeyを分けるのは、`Flake check` と `Home Manager build` でNix storeの内容が異なるためである。
-
-GitHub Actions cacheはbranchごとにscopeが分かれ、pull requestの実行は自身のscopeへ保存しつつdefault branchのscopeから復元できる。
-Cacheのpurgeも実行中のrefのscopeに限定されるため、pull requestの実行が `main` のcache entryを削除することはない。
-
-`nix flake check` と `nix build --no-link` はGC rootを残さないため、store size上限をbuild後のstore sizeより小さくすると、直前にbuildした成果物から回収される。
-Store size上限はbuild後のstore sizeに対して余裕を持たせ、成果物がcacheに残るようにする。
-
-GitHub Actions cacheはリポジトリあたり10GBの上限を持つため、store size上限は2つのjobが同時に保存しても上限へ届かない値にする。
-
-### CI permissions
-
-- `permissions.contents` は `read` のまま維持する。
-- Cache entryのpurgeに必要な `permissions.actions = write` を追加する。
+- `.github/workflows/checks.yaml` は変更しない。
+- `Flake check` と `Home Manager build` のjob名は維持する。
+- `permissions.contents` は `read` のまま維持し、他の権限を追加しない。
 - CIはsecretを参照しない。
 
-`002-ci` ではCIがwrite権限を要求しない方針としていたが、cache entryのpurgeにはGitHub Actions cache APIへの書き込みが必要になる。
-追加する権限はcacheの操作に限られ、リポジトリ内容への書き込み権限は与えない。
+Job名は `main` のrulesetでrequired status checksとして参照するため、変更するとrulesetの設定も更新が必要になる。
 
 ### Documentation
 
@@ -146,11 +126,9 @@ GitHub Actions cacheはリポジトリあたり10GBの上限を持つため、st
 
 - 自動更新はdotfilesのactivationやユーザー環境の変更を行わない。
 - 自動更新とCIは秘密情報、秘密鍵、tokenを必要としない。
-- Cacheが存在しない場合やcacheの復元に失敗した場合でも、CIはfull buildで成功する。
-- Pull requestの実行によるcache purgeが `main` のcache entryを削除しない。
 - Renovateが更新を保留した場合や更新に失敗した場合は、Dependency Dashboard issueから確認できる。
 - CIの実行環境は主対象であるmacOS arm64 runnerのまま維持する。
-- 変更はRenovate設定、CIのcacheと権限、READMEの記述に限定する。
+- 変更はRenovate設定とREADMEの記述に限定する。
 - 秘密情報、認証情報、token、session、cache、log、local stateをGit管理対象やNix storeに含めない。
 
 ## 検証
@@ -160,8 +138,6 @@ GitHub Actions cacheはリポジトリあたり10GBの上限を持つため、st
 - ローカルで `renovate-config-validator renovate.json` が成功すること。
 - CIで `Flake check` jobが成功すること。
 - CIで `Home Manager build` jobが成功すること。
-- CIのlogでNix storeのcacheが保存されること。
-- `flake.lock` を変更しない2回目のCI実行で、Nix storeのcacheが復元されること。
 - Renovate App install後にDependency Dashboard issueが作成されること。
 - `flake.lock` のinputごとに個別のpull requestが作成されること。
 - Pull request titleが `chore(deps):` で始まるsemantic commit形式になること。
@@ -176,7 +152,6 @@ GitHub Actions cacheはリポジトリあたり10GBの上限を持つため、st
 - Renovateの設定項目は <https://docs.renovatebot.com/configuration-options/> を参照する。
 - Renovateのnix managerは <https://docs.renovatebot.com/modules/manager/nix/> を参照する。
 - Renovateのgithub-actions managerは <https://docs.renovatebot.com/modules/manager/github-actions/> を参照する。
-- Nix storeのcacheには <https://github.com/nix-community/cache-nix-action> を使用する。
 - GitHubのrulesetは <https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/managing-rulesets-for-a-repository> を参照する。
 - 更新ツールの選定は `adr/update-tool-selection.md` を参照する。
 - `flake.lock` 更新の粒度は `adr/flake-lock-update-granularity.md` を参照する。
