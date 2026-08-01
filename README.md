@@ -78,8 +78,7 @@ Renovate. The behaviour is configured in `renovate.json` and specified in
 ### Renovate
 
 Install the Renovate GitHub App from <https://github.com/apps/renovate> for this
-repository. Renovate skips its onboarding pull request because `renovate.json`
-is already committed, and starts working on its next run.
+repository.
 
 Renovate tracks held-back and failed updates in a `Dependency Dashboard` issue.
 Major updates are never merged automatically and wait there for a manual
