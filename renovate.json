@@ -16,16 +16,10 @@
     "enabled": true,
     "automerge": true,
     "schedule": [
-      "* 4-7 * * 1"
+      "* 4-7 * * *"
     ]
   },
   "packageRules": [
-    {
-      "matchManagers": [
-        "nix"
-      ],
-      "automerge": true
-    },
     {
       "matchManagers": [
         "github-actions"
