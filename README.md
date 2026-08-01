@@ -51,12 +51,57 @@ Manager runner.
 
 ### Update
 
-Update flake inputs before applying the refreshed configuration.
+Renovate opens a pull request for each flake input every morning, plus a lock
+file maintenance pull request once a week. They merge automatically once
+`Flake check` and `Home Manager build` pass, so `flake.lock` on `main` is
+already current most of the time. Pull the merged result before applying it.
+
+```sh
+git pull
+home-manager switch --flake .#kakudo
+```
+
+To pick up an input without waiting for Renovate, update it locally.
 
 ```sh
 nix flake update
 home-manager switch --flake .#kakudo
 ```
+
+## Dependency Updates
+
+`flake.lock` and the action versions in `.github/workflows` are kept current by
+Renovate. The behaviour is configured in `renovate.json` and specified in
+`specs/features/009-dependency-auto-update/spec.md`.
+
+### Renovate
+
+Install the Renovate GitHub App from <https://github.com/apps/renovate> for this
+repository, then merge the `Configure Renovate` onboarding pull request it
+opens.
+
+Renovate tracks held-back and failed updates in a `Dependency Dashboard` issue.
+Major updates are never merged automatically and wait there for a manual
+review.
+
+### Branch Protection
+
+Automatic merges use GitHub auto-merge, which needs both a repository setting
+and a ruleset on `main`. GitHub has no way to apply either from a file in the
+repository, so configure them once in the web UI.
+
+Enable Settings > General > Pull Requests > Allow auto-merge.
+
+Create a ruleset under Settings > Rules > Rulesets that targets the `main`
+branch with these rules.
+
+- Require a pull request before merging, with required approvals set to `0`.
+- Require status checks to pass, selecting `Flake check` and
+  `Home Manager build`.
+
+Do not add required reviewers. Renovate cannot merge its own pull requests when
+an approval is required, and auto-merge cannot be enabled at all on a branch
+without required status checks or reviews.
 
 ## Git
 
