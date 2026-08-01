@@ -20,6 +20,9 @@
     ignores = [
       ".DS_Store"
       ".claude/settings.local.json"
+      ".claude/worktrees/"
+      ".claude/agent-memory-local/"
+      "CLAUDE.local.md"
     ];
     includes = [
       {
