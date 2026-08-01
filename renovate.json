@@ -22,23 +22,6 @@
   "packageRules": [
     {
       "matchManagers": [
-        "nix"
-      ],
-      "matchUpdateTypes": [
-        "major",
-        "minor",
-        "patch",
-        "pin",
-        "pinDigest",
-        "digest",
-        "rollback",
-        "bump",
-        "replacement"
-      ],
-      "enabled": false
-    },
-    {
-      "matchManagers": [
         "github-actions"
       ],
       "matchUpdateTypes": [

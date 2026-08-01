@@ -20,7 +20,7 @@ Renovateの `nix` managerはbetaであり、branchを追従するinputに対す�
 
 - `flake.lock` の更新は `lockFileMaintenance` に一本化する。
 - `lockFileMaintenance` は週次から日次へ変更する。
-- inputごとの個別更新は設定として無効にする。
+- inputごとの個別更新に対する設定は持たない。
 - GitHub Actionsのaction versionの更新方針は変更しない。
 - 自動マージとbranch protectionの方針は変更しない。
 - READMEの記述を実際の動作に合わせる。
@@ -37,14 +37,15 @@ Renovateの `nix` managerはbetaであり、branchを追従するinputに対す�
 ### Flake input updates
 
 - `lockFileMaintenance.schedule` を日次にする。日次のscheduleはtop levelの `schedule` と同じ時間帯とする。
-- `nix` managerの `lockFileMaintenance` 以外の更新種別を無効にする。
 - `nix` managerの有効化は維持する。無効にすると `lockFileMaintenance` も動作しない。
 - `lockFileMaintenance` の自動マージは維持する。
+- inputごとの個別更新に対するpackage ruleは置かない。
 
 `lockFileMaintenance` はRenovateの既定で独自のscheduleを持つため、top levelの `schedule` を継承しない。
 日次にするには `lockFileMaintenance` 側へ明示的に指定する必要がある。
 
-個別更新を無効にするのは、`nix` managerが将来個別更新を出すようになったとき、日次の `lockFileMaintenance` と同じ内容のpull requestが二重に立つのを避けるためである。
+個別更新を抑止する設定は置かない。
+`nix` managerが個別更新に対応した時点で、`lockFileMaintenance` との併用方針をあらためて決める。
 
 ### Documentation
 
