@@ -20,7 +20,7 @@ jq --raw-output \
   def tokens: if . >= 1000000 then (. / 1000000 * 10 | round | . / 10 | tostring) + "M" elif . >= 1000 then (. / 1000 | round | tostring) + "K" else tostring end;
   def resetInHoursMinutes: (. - now) as $remain | " (\($remain / 3600 | floor)h \(($remain % 3600) / 60 | floor)m)" | dim;
   def resetInDaysHours: (. - now) as $remain | " (\($remain / 86400 | floor)d \(($remain % 86400) / 3600 | floor)h)" | dim;
-  def rateLimit(name; resetFormat): if .used_percentage == null then "" else "\(name) \(.used_percentage | percent)\(.resets_at | resetFormat)" end;
+  def rateLimit(name; resetFormat): if .used_percentage == null or .resets_at == null then "" else "\(name) \(.used_percentage | percent)\(.resets_at | resetFormat)" end;
   def ownerRepo:
     sub("^[A-Za-z][A-Za-z0-9+.-]*://"; "")
     | sub("^[^/@]*@"; "")
