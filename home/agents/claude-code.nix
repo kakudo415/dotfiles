@@ -1,51 +1,16 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   jsonFormat = pkgs.formats.json { };
 
-  statusLineScript = pkgs.writeShellScript "claude-code-statusline" ''
-    input="$(cat)"
-
-    firstLine="$(printf '%s' "$input" | ${pkgs.jq}/bin/jq --raw-output '
-      def percent: "\(round)%";
-      def dim: "\u001b[2m\(.)\u001b[22m";
-      def formatTokens: if . >= 1000000 then (. / 1000000 * 10 | round | . / 10 | tostring) + "M" elif . >= 1000 then (. / 1000 | round | tostring) + "K" else tostring end;
-      def resetInHoursMinutes: (. - now) as $remain | ($remain / 3600 | floor) as $hours | (($remain % 3600) / 60 | floor) as $minutes | " (\($hours)h \($minutes)m)" | dim;
-      def resetInDaysHours: (. - now) as $remain | ($remain / 86400 | floor) as $days | (($remain % 86400) / 3600 | floor) as $hours | " (\($days)d \($hours)h)" | dim;
-      def rateLimit(name; resetFormat): select(.used_percentage != null) | "\(name) \(.used_percentage | percent)\(.resets_at | resetFormat)";
-      [
-        (.model.display_name // empty),
-        (.context_window | select(.used_percentage != null) | "\(.used_percentage | percent) " + ("(\(.total_input_tokens | formatTokens)/\(.context_window_size | formatTokens))" | dim)),
-        (.rate_limits.five_hour | rateLimit("5h"; resetInHoursMinutes)),
-        (.rate_limits.seven_day | rateLimit("7d"; resetInDaysHours))
-      ] | join(" │ ")
-    ')"
-
-    currentDir="$(printf '%s' "$input" | ${pkgs.jq}/bin/jq --raw-output '.workspace.current_dir // .workspace.project_dir // empty')"
-    branchName=""
-    if [ -n "$currentDir" ]; then
-      branchName="$(${pkgs.git}/bin/git -C "$currentDir" branch --show-current 2>/dev/null)"
-    fi
-
-    secondLine="$(printf '%s' "$input" | ${pkgs.jq}/bin/jq --raw-output --arg branchName "$branchName" '
-      def dim: "\u001b[2m\(.)\u001b[22m";
-      if .workspace.repo.name == null then empty else
-        (if .workspace.repo.owner == null then .workspace.repo.name else "\(.workspace.repo.owner)/\(.workspace.repo.name)" end) as $ownerRepo |
-        (.workspace.git_worktree // "") as $worktree |
-        (if $worktree == "" then "" else (" (\($worktree))" | dim) end) as $worktreeSuffix |
-        [
-          $ownerRepo,
-          ($branchName | select(length > 0) | . + $worktreeSuffix)
-        ] | join(" │ ")
-      end
-    ')"
-
-    if [ -n "$secondLine" ]; then
-      printf '%s\n%s\n' "$firstLine" "$secondLine"
-    else
-      printf '%s\n' "$firstLine"
-    fi
-  '';
+  statusLineScript = pkgs.writeShellApplication {
+    name = "claude-code-statusline";
+    runtimeInputs = [
+      pkgs.git
+      pkgs.jq
+    ];
+    text = builtins.readFile ./claude-code-statusline.sh;
+  };
 
   claudeCodeSettings = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
@@ -65,7 +30,7 @@ let
     cleanupPeriodDays = 1825; # 5 years
     statusLine = {
       type = "command";
-      command = "${statusLineScript}";
+      command = lib.getExe statusLineScript;
     };
     theme = "dark";
     tui = "fullscreen";
