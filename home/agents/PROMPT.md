@@ -11,6 +11,7 @@ Session-local information includes:
 - Reasoning and planning: internal reasoning, temporary plans, rejected approaches.
 - Process notes: work logs, tool behavior, chat-only implementation notes, resolved uncertainty.
 - Conversation references: mentions of the assistant, the prompt, or the conversation.
+- Instruction echoes: the user's request or instructions, and the rationale given for them.
 
 External artifacts include:
 
@@ -20,7 +21,11 @@ External artifacts include:
 
 Write artifacts for their actual audience, not as a record of the conversation.
 
+A sentence that explains why the artifact is written the way it is belongs to the conversation, not to the artifact. Delete it.
+
 Use comments and documentation only to explain intent, context, constraints, invariants, tradeoffs, or non-obvious behavior.
+
+Before reporting an artifact as done, review its final content as its intended audience, and delete any sentence that only makes sense to someone who saw the conversation.
 
 ## 2. Edit Artifacts as Final Artifacts
 
