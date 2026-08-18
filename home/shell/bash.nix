@@ -8,6 +8,14 @@ in
     enable = true;
     enableCompletion = false;
 
+    # The Nix installer writes this into /etc/bashrc, which macOS updates
+    # overwrite. Sourcing it here keeps Nix on PATH without depending on a
+    # system-owned file. bashrcExtra rather than initExtra, because /etc/bashrc
+    # sources it before the interactive-shell guard.
+    bashrcExtra = ''
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    '';
+
     shellOptions = [
       "checkwinsize"
       "histappend"
