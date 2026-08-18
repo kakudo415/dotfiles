@@ -16,6 +16,14 @@ in
     inherit (shellCommon) shellAliases;
 
     initContent = lib.mkMerge [
+      # The Nix installer writes this into /etc/zshrc, which macOS updates
+      # overwrite. Sourcing it here keeps Nix on PATH without depending on a
+      # system-owned file. Order 500 runs before the fpath loop that reads
+      # NIX_PROFILES.
+      (lib.mkOrder 500 ''
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      '')
+
       (lib.mkOrder 1000 ''
         # Prompt
         # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
