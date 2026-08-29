@@ -74,6 +74,12 @@ let
   claudeCodePackage = pkgs.writeShellScriptBin "claude" ''
     exec "${pkgs.llm-agents.claude-code}/bin/claude" --settings "$HOME/.claude/settings.shared.json" "$@"
   '';
+
+  claudeCodeStatelessPackage = pkgs.writeShellScriptBin "claude-stateless" ''
+    export CLAUDE_CODE_SKIP_PROMPT_HISTORY=1
+    export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1
+    exec "${claudeCodePackage}/bin/claude" "$@"
+  '';
 in
 {
   programs.claude-code = {
@@ -81,6 +87,8 @@ in
     package = claudeCodePackage;
     context = ./PROMPT.md;
   };
+
+  home.packages = [ claudeCodeStatelessPackage ];
 
   home.file.".claude/settings.shared.json".source =
     jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
