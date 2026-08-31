@@ -10,6 +10,16 @@
       "github-actions"
     ];
 
+    userKeymaps = [
+      {
+        context = "Pane";
+        bindings = {
+          ctrl-tab = "pane::ActivateNextItem";
+          ctrl-shift-tab = "pane::ActivatePreviousItem";
+        };
+      }
+    ];
+
     userSettings = {
       base_keymap = "VSCode";
       vim_mode = false;
@@ -45,6 +55,7 @@
         show_tab_bar_buttons = false;
       };
       tabs = {
+        activate_on_close = "neighbour";
         file_icons = true;
         git_status = true;
       };
