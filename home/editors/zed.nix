@@ -55,6 +55,7 @@
         show_tab_bar_buttons = false;
       };
       tabs = {
+        activate_on_close = "neighbour";
         file_icons = true;
         git_status = true;
       };
