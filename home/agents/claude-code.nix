@@ -72,7 +72,14 @@ let
   };
 
   claudeCodePackage = pkgs.writeShellScriptBin "claude" ''
-    exec "${pkgs.llm-agents.claude-code}/bin/claude" --settings "$HOME/.claude/settings.shared.json" "$@"
+    case "''${1-}" in
+      attach | kill | logs | respawn | rm | stop)
+        exec "${pkgs.llm-agents.claude-code}/bin/claude" "$@"
+        ;;
+      *)
+        exec "${pkgs.llm-agents.claude-code}/bin/claude" --settings "$HOME/.claude/settings.shared.json" "$@"
+        ;;
+    esac
   '';
 
   claudeCodeStatelessPackage = pkgs.writeShellScriptBin "claude-stateless" ''
