@@ -89,14 +89,16 @@ in
     context = ./PROMPT.md;
   };
 
-  home.packages = [ claudeCodeStatelessPackage ];
+  home = {
+    packages = [ claudeCodeStatelessPackage ];
 
-  home.sessionVariables = {
-    DISABLE_AUTOUPDATER = 1;
-    DISABLE_ERROR_REPORTING = 1;
-    DISABLE_TELEMETRY = 1;
+    sessionVariables = {
+      DISABLE_AUTOUPDATER = 1;
+      DISABLE_ERROR_REPORTING = 1;
+      DISABLE_TELEMETRY = 1;
+    };
+
+    file.".claude/settings.shared.json".source =
+      jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
   };
-
-  home.file.".claude/settings.shared.json".source =
-    jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
 }
