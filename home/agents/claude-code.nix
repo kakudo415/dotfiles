@@ -14,12 +14,6 @@ let
 
   claudeCodeSettings = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
-    env = {
-      EDITOR = "nvim";
-      DISABLE_AUTOUPDATER = 1;
-      DISABLE_ERROR_REPORTING = 1;
-      DISABLE_TELEMETRY = 1;
-    };
     attribution = {
       commit = "";
       pr = "";
@@ -95,8 +89,16 @@ in
     context = ./PROMPT.md;
   };
 
-  home.packages = [ claudeCodeStatelessPackage ];
+  home = {
+    packages = [ claudeCodeStatelessPackage ];
 
-  home.file.".claude/settings.shared.json".source =
-    jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
+    sessionVariables = {
+      DISABLE_AUTOUPDATER = 1;
+      DISABLE_ERROR_REPORTING = 1;
+      DISABLE_TELEMETRY = 1;
+    };
+
+    file.".claude/settings.shared.json".source =
+      jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
+  };
 }
