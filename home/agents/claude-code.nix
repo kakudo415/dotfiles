@@ -95,7 +95,6 @@ in
     sessionVariables = {
       DISABLE_AUTOUPDATER = 1;
       DISABLE_ERROR_REPORTING = 1;
-      DISABLE_TELEMETRY = 1;
     };
 
     file.".claude/settings.shared.json".source =
