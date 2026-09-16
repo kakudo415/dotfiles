@@ -9,6 +9,8 @@ in
     dotDir = "${config.xdg.configHome}/zsh";
     enableCompletion = false;
 
+    defaultKeymap = "emacs";
+
     setOptions = [
       "PROMPT_SUBST"
     ];
