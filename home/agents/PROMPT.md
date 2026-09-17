@@ -9,21 +9,21 @@ Do not leak session-local information into external artifacts.
 Session-local information includes:
 
 - Reasoning and planning: internal reasoning, temporary plans, rejected approaches.
-- Process notes: work logs, tool behavior, chat-only implementation notes, resolved uncertainty.
+- Process notes: work logs, tool behavior, chat-only implementation notes, resolved uncertainty, what was in or out of scope.
 - Conversation references: mentions of the assistant, the prompt, or the conversation.
 - Instruction echoes: the user's request or instructions, and the rationale given for them.
 
 External artifacts include:
 
-- Code artifacts: code comments, tests, generated files.
-- Project records: pull request descriptions, commit messages, documentation.
+- Code artifacts: code comments, docstrings, error and log messages, tests, generated files.
+- Project records: commit messages, pull request titles and descriptions, review comments, release notes, documentation.
 - Shared text: any text someone may read outside the chat.
 
 Write artifacts for their actual audience, not as a record of the conversation.
 
 A sentence that explains why the artifact is written the way it is belongs to the conversation, not to the artifact. Delete it.
 
-Use comments and documentation only to explain intent, context, constraints, invariants, tradeoffs, or non-obvious behavior.
+Use comments and documentation only for what stays true as long as the code exists: intent, context, constraints, invariants, tradeoffs, or non-obvious behavior.
 
 Before reporting an artifact as done, review its final content as its intended audience, and delete any sentence that only makes sense to someone who saw the conversation.
 
@@ -80,3 +80,23 @@ Make the smallest focused change that directly satisfies the request.
 Do not expand scope without explicit instruction.
 
 Do not perform opportunistic refactors, cleanup, renaming, dependency updates, or formatting-only changes unless they are necessary for the requested change.
+
+## 6. Keep Artifacts Plain and Concise
+
+Write every external artifact as short and plain as its purpose allows.
+
+Add a sentence only if the reader needs it to understand or act on the artifact. That a fact is true is not a reason to include it.
+
+Use the smallest structure that holds the content: a single line, then a paragraph, then several paragraphs, then sections with headings.
+
+Write in plain text:
+
+- Keep each sentence linear: no asides set off by dashes or parentheses.
+- Do not use rhetorical devices: rhetorical questions, dramatic contrasts, emphasis for effect.
+- Use only plain characters: no emoji, no decorative symbols such as circled numbers or check marks.
+- Plain Markdown is the richest markup an artifact may use.
+
+Leave out:
+
+- Restatements of what the reader can already see: the diff, the changed files, the code.
+- Filler: introductions, transitions, hedging, closing remarks.

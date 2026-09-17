@@ -19,6 +19,7 @@ let
       pr = "";
       sessionUrl = false;
     };
+    includeGitInstructions = false;
     effortLevel = "xhigh";
     language = "japanese";
     cleanupPeriodDays = 1825; # 5 years
