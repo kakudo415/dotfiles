@@ -14,21 +14,13 @@ let
 
   claudeCodeSettings = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+    cleanupPeriodDays = 1825; # 5 years
     attribution = {
       commit = "";
       pr = "";
       sessionUrl = false;
     };
     includeGitInstructions = false;
-    effortLevel = "xhigh";
-    language = "japanese";
-    cleanupPeriodDays = 1825; # 5 years
-    statusLine = {
-      type = "command";
-      command = lib.getExe statusLineScript;
-    };
-    theme = "dark";
-    tui = "fullscreen";
     permissions = {
       allow = [
         "Bash(git add *)"
@@ -64,6 +56,15 @@ let
         "Bash(gh release view *)"
       ];
     };
+    language = "japanese";
+    effortLevel = "xhigh";
+    statusLine = {
+      type = "command";
+      command = lib.getExe statusLineScript;
+    };
+    outputStyle = "Concise";
+    tui = "fullscreen";
+    theme = "dark";
   };
 
   claudeCodePackage = pkgs.writeShellScriptBin "claude" ''
