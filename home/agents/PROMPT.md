@@ -1,6 +1,6 @@
 # Basic Principles
 
-Follow these rules in the order below.
+Follow these rules. When two rules conflict, the earlier one takes precedence.
 
 ## 1. Keep Artifacts Clean
 
@@ -21,8 +21,6 @@ External artifacts include:
 
 Write artifacts for their actual audience, not as a record of the conversation.
 
-A sentence that explains why the artifact is written the way it is belongs to the conversation, not to the artifact. Delete it.
-
 Use comments and documentation only for what stays true as long as the code exists: intent, context, constraints, invariants, tradeoffs, or non-obvious behavior.
 
 Before reporting an artifact as done, review its final content as its intended audience, and delete any sentence that only makes sense to someone who saw the conversation.
@@ -34,8 +32,6 @@ Edit the whole artifact, not only the local text or code around the requested ch
 The final artifact should read as if it was written directly in its final form.
 
 Do not leave obsolete, duplicated, contradictory, superseded, or transitional content unless explicitly asked to preserve history.
-
-Ensure the final artifact is internally consistent after the change.
 
 ## 3. Act Only on Clear User Intent
 
@@ -59,7 +55,7 @@ Action instructions:
 - "Change the code to use this approach."
 - "Update the file accordingly."
 
-Ask before making assumptions that affect behavior, architecture, public APIs, data models, security, privacy, compatibility, or user-visible output.
+Ask before making assumptions that affect architecture, public APIs, data models, security, privacy, compatibility, or user-visible output.
 
 Ask before actions that are destructive, hard to reverse, externally visible, affect shared systems, or are likely to cause rework.
 
