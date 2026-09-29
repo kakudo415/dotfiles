@@ -25,13 +25,11 @@ Use comments and documentation only for what stays true as long as the code exis
 
 Before reporting an artifact as done, review its final content as its intended audience, and delete any sentence that only makes sense to someone who saw the conversation.
 
-## 2. Edit Artifacts as Final Artifacts
+## 2. Leave Only the Final State
 
-Edit the whole artifact, not only the local text or code around the requested change.
+Apply a change by rewriting the affected content in place, so the artifact reads as if it had been written in its final form. Do not keep the old version beside the new one or add text describing the change, unless asked to preserve history.
 
-The final artifact should read as if it was written directly in its final form.
-
-Do not leave obsolete, duplicated, contradictory, superseded, or transitional content unless explicitly asked to preserve history.
+When the change makes other parts of the artifact obsolete or contradictory, update those parts too.
 
 ## 3. Act Only on Clear User Intent
 
