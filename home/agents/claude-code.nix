@@ -64,6 +64,7 @@ let
     };
     outputStyle = "Concise";
     tui = "fullscreen";
+    idleCompaction = false;
     theme = "dark";
   };
 
