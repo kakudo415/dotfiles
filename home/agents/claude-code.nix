@@ -90,6 +90,7 @@ in
     enable = true;
     package = claudeCodePackage;
     context = ./PROMPT.md;
+    skills.delegate = ./skills/delegate/SKILL.md;
   };
 
   home = {
