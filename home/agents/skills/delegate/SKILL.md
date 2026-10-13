@@ -6,45 +6,72 @@ compatibility: Requires an agent that can fork a child session inheriting the wh
 
 # Delegate mode
 
-This mode stays on for the rest of the session. If invoked with arguments, they are the first task.
+The main session coordinates, forked sessions do the work, and the user reviews each forked session's summary. The mode stays on for the rest of the session. If invoked with arguments, they are the first task.
 
-## Which role you are
+## Roles
 
-A fork inherits this skill. If you are a forked child session, follow "Fork" below. Otherwise follow "Main".
+A forked session inherits this skill. If you are one, follow Forked session. Otherwise follow Main session.
 
-## Main
+### Main session
 
-Keep your own context small so that the user's instructions, corrections, and background stay intact for every fork. Do only these yourself:
+- Talk with the user, split the task, fork, and relay summaries. Everything else, including reading files, is a forked session's job. If you need a plan or structure first, fork for it.
+- Fork so that the forked session inherits the whole conversation. A fresh agent given a written brief loses the user's instructions and background.
+- The brief is the scope only, as in the examples below. The forked session reads this skill, so do not repeat background, rules, or the summary format; a rule restated in other words drifts and competes with the skill.
+- Apply corrections with a new forked session, which starts from the corrected context. Continue the same forked session only for a small follow-up to its own work.
 
-- Talk with the user.
-- Split the task and fork.
-- Relay each fork's summary and collect the user's review.
+### Forked session
 
-Fork everything else, including reading files, searching, fetching, writing, and editing. If you need an overall structure or a plan before splitting, fork a child to propose it first; the proposal comes back into your context and later forks inherit it.
+- Do the task yourself. Do not fork again.
+- Stay within the brief's scope. Other forked sessions may own the neighbouring parts.
+- You cannot ask the user. Take the conservative reading, continue, and note the assumption in your summary.
+- Stop before destructive, hard-to-reverse, or externally visible actions and report them as awaiting confirmation.
+- If the task is too large for one session, stop at a clean point, report, and propose a split.
+- End with a summary as in the examples below: complete or not, what you did and decided, assumptions, and what awaits confirmation. No diffs or file contents; they would fill the main session's context.
 
-Forking:
+## Examples
 
-- Fork so that the child inherits this whole conversation. A fresh agent given a written brief loses the user's instructions and background.
-- The brief states only what this fork does and does not do. Do not restate background; the fork already has the whole conversation.
+### Writing a document in parallel, then correcting it
 
-After a fork returns:
+User:
 
-- Relay its summary to the user as it is. The user cannot see it otherwise.
-- Wait for the user's review. Their corrections now sit in context and apply to every later fork.
-- Apply corrections with a new fork. It starts from the context that now holds the user's corrections, instead of inheriting the previous fork's grown context. Continue the same fork only for a small follow-up to the work it just did.
+> Write docs/guide.md following the outline in it.
 
-## Fork
+The main session forks one session per chapter. The brief to one of them:
 
-You are the worker. Do the task in the brief yourself; never fork or spawn agents.
+> Write chapter 3 (deployment) of docs/guide.md. Chapters 2 and 4 are being written by other forked sessions.
 
-- Stay within the brief's scope. Other forks may be working on neighbouring parts at the same time, and the user reviews the work per scope.
-- You cannot ask the user. On ambiguity, take the most conservative interpretation, continue, and record the assumption in your summary.
-- Stop before any destructive, hard-to-reverse, or externally visible action and report it as awaiting confirmation.
-- If the task is too large for one session, stop at a clean point, report what is done, and propose how to split the rest.
+Each forked session ends with a summary, which the main session relays to the user as it is:
 
-Finish with a short summary the user can review from:
+> Chapter 3 is written. It covers the three deployment targets in the outline with the deploy commands found in the source, and points to the environment variable table in chapter 2 instead of repeating it. The outline did not name the staging cluster, so I took the name from the Makefile. Nothing awaits confirmation.
 
-- Whether the task in the brief is complete.
-- What you did and what you decided, without diffs or file contents. They would fill the main session's context, which this mode exists to keep small.
-- Assumptions you made.
-- Anything awaiting confirmation.
+User:
+
+> Those are the 2.x commands. The guide is for 3.0, where the deploy subcommands and the config format changed. Use the 3.0 branch.
+
+The main session forks a new session:
+
+> Rewrite chapter 3 (deployment) of docs/guide.md against the 3.0 branch.
+
+The correction now sits in the context that every later forked session inherits.
+
+### Renaming a field across services, with a decision that spans two of them
+
+User:
+
+> Rename customer_id to account_id across the services in this repo.
+
+The main session forks one session per service. The brief to one of them:
+
+> Rename customer_id to account_id in the events service. The other services are being handled by other forked sessions.
+
+The summary:
+
+> Renamed in the events service's code, tests, and migration, except in the order-created event. It is consumed by the billing service and by an external partner, so renaming the field there breaks the partner's integration. Options: rename it anyway, emit both names for a transition period, or leave the event as is. Awaiting confirmation: which one?
+
+User:
+
+> Emit both for now. Removing the old name is tracked separately with the partner.
+
+The change now spans the emitter in events and the consumer in billing, which two forked sessions handled separately, so the main session forks a new session:
+
+> Emit both customer_id and account_id in the order-created event, and make the billing consumer read account_id. The rest of both services is already renamed.
