@@ -12,6 +12,12 @@ let
     text = builtins.readFile ./claude-code-statusline.sh;
   };
 
+  subagentStatusLineScript = pkgs.writeShellApplication {
+    name = "claude-code-subagent-statusline";
+    runtimeInputs = [ pkgs.jq ];
+    text = builtins.readFile ./claude-code-subagent-statusline.sh;
+  };
+
   claudeCodeSettings = {
     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
     cleanupPeriodDays = 1825; # 5 years
@@ -61,6 +67,10 @@ let
     statusLine = {
       type = "command";
       command = lib.getExe statusLineScript;
+    };
+    subagentStatusLine = {
+      type = "command";
+      command = lib.getExe subagentStatusLineScript;
     };
     outputStyle = "Concise";
     tui = "fullscreen";
