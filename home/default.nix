@@ -20,7 +20,9 @@
 
     packages = with pkgs; [
       ghostty-bin
-      go
+      go_latest
+      (google-cloud-sdk.withExtraComponents [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
+      (lib.hiPrio kubectl)
       lsd
       orbstack
       pinentry_mac

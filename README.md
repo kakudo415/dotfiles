@@ -68,6 +68,18 @@ nix flake update
 home-manager switch --flake .#kakudo
 ```
 
+### Nix Update
+
+Nix itself and the CA bundle it uses are installed in the root profile at
+`/nix/var/nix/profiles/default`, which this flake does not manage. Upgrade them
+separately and restart the Nix daemon.
+
+```sh
+sudo nix-env --install --file '<nixpkgs>' --attr nix cacert -I nixpkgs=channel:nixpkgs-unstable
+sudo launchctl remove org.nixos.nix-daemon
+sudo launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist
+```
+
 ## Dependency Updates
 
 `flake.lock` and the action versions in `.github/workflows` are kept current by
