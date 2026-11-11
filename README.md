@@ -29,12 +29,12 @@ experimental-features = nix-command flakes
 
 ### First Apply
 
-Use Home Manager from its release flake for the first activation. This does not
+Use Home Manager from its flake for the first activation. This does not
 require `home-manager` to already be installed in the user environment. Existing
 files are backed up with a date-based extension, such as `backup-20260628`.
 
 ```sh
-nix run github:nix-community/home-manager/release-26.05 -- switch --flake .#kakudo -b "backup-$(date +%Y%m%d)"
+nix run github:nix-community/home-manager -- switch --flake .#kakudo -b "backup-$(date +%Y%m%d)"
 ```
 
 ### Daily Apply

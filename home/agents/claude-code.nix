@@ -1,8 +1,6 @@
 { lib, pkgs, ... }:
 
 let
-  jsonFormat = pkgs.formats.json { };
-
   statusLineScript = pkgs.writeShellApplication {
     name = "claude-code-statusline";
     runtimeInputs = [
@@ -19,7 +17,6 @@ let
   };
 
   claudeCodeSettings = {
-    "$schema" = "https://json.schemastore.org/claude-code-settings.json";
     cleanupPeriodDays = 1825; # 5 years
     attribution = {
       commit = "";
@@ -63,7 +60,6 @@ let
       ];
     };
     language = "japanese";
-    effortLevel = "xhigh";
     statusLine = {
       type = "command";
       command = lib.getExe statusLineScript;
@@ -78,27 +74,18 @@ let
     theme = "dark";
   };
 
-  claudeCodePackage = pkgs.writeShellScriptBin "claude" ''
-    case "''${1-}" in
-      attach | kill | logs | respawn | rm | stop)
-        exec "${pkgs.llm-agents.claude-code}/bin/claude" "$@"
-        ;;
-      *)
-        exec "${pkgs.llm-agents.claude-code}/bin/claude" --settings "$HOME/.claude/settings.shared.json" "$@"
-        ;;
-    esac
-  '';
-
   claudeCodeStatelessPackage = pkgs.writeShellScriptBin "claude-stateless" ''
     export CLAUDE_CODE_SKIP_PROMPT_HISTORY=1
     export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1
-    exec "${claudeCodePackage}/bin/claude" "$@"
+    exec claude "$@"
   '';
 in
 {
   programs.claude-code = {
     enable = true;
-    package = claudeCodePackage;
+    package = null;
+    mutableSettings = true;
+    settings = claudeCodeSettings;
     context = ./PROMPT.md;
     skills.delegate = ./skills/delegate/SKILL.md;
   };
@@ -107,11 +94,7 @@ in
     packages = [ claudeCodeStatelessPackage ];
 
     sessionVariables = {
-      DISABLE_AUTOUPDATER = 1;
       DISABLE_ERROR_REPORTING = 1;
     };
-
-    file.".claude/settings.shared.json".source =
-      jsonFormat.generate "claude-code-settings.shared.json" claudeCodeSettings;
   };
 }

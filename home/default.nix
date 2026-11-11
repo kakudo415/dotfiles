@@ -16,7 +16,6 @@
     username = "kakudo";
     homeDirectory = "/Users/kakudo";
     stateVersion = "26.05";
-    enableNixpkgsReleaseCheck = false;
 
     packages = with pkgs; [
       ghostty-bin
