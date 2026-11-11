@@ -5,11 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    llm-agents.url = "github:numtide/llm-agents.nix";
 
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
@@ -22,7 +20,6 @@
       self,
       nixpkgs,
       home-manager,
-      llm-agents,
       treefmt-nix,
       ...
     }:
@@ -33,12 +30,8 @@
         config.allowUnfreePredicate =
           pkg:
           builtins.elem (nixpkgs.lib.getName pkg) [
-            "claude-code"
             "orbstack"
           ];
-        overlays = [
-          llm-agents.overlays.shared-nixpkgs
-        ];
       };
       treefmtEval = treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
