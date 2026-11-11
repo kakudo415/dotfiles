@@ -17,6 +17,12 @@ in
 
     inherit (shellCommon) shellAliases;
 
+    # Adds ~/.orbstack/bin, the only place that provides docker-compose and
+    # docker-credential-osxkeychain.
+    profileExtra = ''
+      source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+    '';
+
     initContent = lib.mkMerge [
       # The Nix installer writes this into /etc/zshrc, which macOS updates
       # overwrite. Sourcing it here keeps Nix on PATH without depending on a
